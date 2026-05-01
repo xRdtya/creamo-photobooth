@@ -15,10 +15,10 @@
                     <a href="#"><img class="w-56" src="assets/img/logocreamo.png" alt="Logo"></a>
                 </li>
                 <li class="grid content-center">
-                    <a class="font-montserrat font-bold text-lg text-queaternary" href="#">About</a>
+                    <a class="font-montserrat font-bold text-lg text-queaternary" href="#about">About</a>
                 </li>
                 <li class="grid content-center">
-                    <a class="font-montserrat font-bold text-lg text-queaternary" href="#">Pricing</a>
+                    <a class="font-montserrat font-bold text-lg text-queaternary" href="#subs">Subscription</a>
                 </li>
                 <li class="grid content-center my-4 w-32 bg-queaternary text-secondary rounded-full hover:bg-queaternary/80">
                     <a class="text-center text-lg font-montserrat font-medium" href="#">Login</a>
