@@ -111,7 +111,23 @@
             <svg class="absolute bottom-0 z-10" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="var(--color-queaternary)" fill-opacity="1" d="M0,96L48,90.7C96,85,192,75,288,85.3C384,96,480,128,576,165.3C672,203,768,245,864,261.3C960,277,1056,267,1152,218.7C1248,171,1344,85,1392,42.7L1440,0L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>
         </section>
         <footer class="h-[40vh] bg-queaternary flex justify-center">
-            <div class="h-11/12 w-11/12 rounded-4xl border-(--glass-border) shadow-2xl/20 inset-shadow-sm inset-shadow-white/20 backdrop-blur-sm bg-(--glass-bg)"></div>
+            <div class="h-11/12 w-11/12 rounded-4xl border-(--glass-border) shadow-2xl/20 inset-shadow-sm inset-shadow-white/20 backdrop-blur-sm bg-(--glass-bg) relative">
+                <div class="h-full grid grid-cols-3 content-center mx-12.5">
+                    <div>
+                        <img src="assets/img/logocreamo2.png" alt="Logo">
+                        <p class="font-montserrat text-secondary font-light text-lg mt-8 mb-15">Inovasi Photobooth Digital untuk <br> Setiap Momen Berhargamu</p>
+                    </div>
+                    <div class="w-px h-62.5 bg-secondary/30 m-auto"></div>
+                    <div class="flex flex-col justify-center m-auto">
+                        <h2 class="font-montserrat font-bold text-secondary text-3xl">Head Office (Creamo)</h2>
+                        <p class="font-montserrat text-secondary font-light text-lg">Jalan Pelita Blok D No. 9, Banjarbaru <br>Kalimantan Selatan. Indonesia.</p>
+                        <br>
+                        <p class="font-montserrat text-secondary font-light text-lg">creamophotography@gmail.com</p>
+                        <p class="font-montserrat text-secondary font-light text-lg">085248713983</p>
+                    </div>
+                </div>
+                <small class="font-montserrat text-primary font-extralight bottom-3 left-12 absolute">&copy; 2026 Creamo, All rights reserved.</small>
+            </div>
         </footer>
     </body>
 </html>
