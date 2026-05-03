@@ -1,11 +1,29 @@
 <?php
 
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\SocialAuthController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function() {
     return view("landing");
 });
+
+Route::get('/signin', function() {
+    return view("auth.signin");
+});
+
+Route::get('/signup', function() {
+    return view("auth.signup");
+});
+
+// Google OAuth Routes
+Route::get('/auth/google/redirect', [SocialAuthController::class, 'redirectToGoogle'])->name('auth.google');
+Route::get('/auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback']);
+
+// Temporary dashboard placeholder after login
+Route::get('/dashboard', function() {
+    return 'Login berhasil! Dashboard akan dibuat segera.';
+})->middleware('auth:merchant');
 
 Route::get('/photo', function() {
     return view("Customer.frontPage");
