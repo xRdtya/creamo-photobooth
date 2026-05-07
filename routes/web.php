@@ -22,6 +22,11 @@ Route::middleware(['guest:merchant'])->group(function() {
 Route::get('/auth/google/redirect', [SocialAuthController::class, 'redirectToGoogle'])->name('auth.google');
 Route::get('/auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback']);
 
+// Apple OAuth Routes
+Route::get('/auth/apple/redirect', [SocialAuthController::class, 'redirectToApple'])->name('auth.apple');
+Route::get('/auth/apple/callback', [SocialAuthController::class, 'handleAppleCallback']);
+Route::post('/auth/apple/callback', [SocialAuthController::class, 'handleAppleCallback']);
+
 // Temporary dashboard placeholder after login
 Route::get('/dashboard', function() {
     return 'Login berhasil! Dashboard akan dibuat segera.';

@@ -67,10 +67,10 @@
                             <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="w-4 h-4 mr-2">
                             <span class="text-[12px] font-bold text-gray-800">Sign In with Google</span>
                         </a>
-                        <button type="button" class="flex-1 flex items-center justify-center py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors opacity-50 cursor-not-allowed" title="Apple Sign In coming soon">
+                        <a href="/auth/apple/redirect" class="flex-1 flex items-center justify-center py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                             <i class="fa-brands fa-apple text-lg mr-2"></i>
                             <span class="text-[12px] font-bold text-gray-800">Sign In with Apple</span>
-                        </button>
+                        </a>
                     </div>
 
                     <!-- Submit Button -->
