@@ -6,6 +6,7 @@ use App\Models\Merchant;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Auth;
+use Laravel\Prompts\Prompt;
 
 class SocialAuthController extends Controller
 {
@@ -14,7 +15,7 @@ class SocialAuthController extends Controller
      */
     public function redirectToGoogle()
     {
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google')->with(['prompt' => 'select_account'])->redirect();
     }
 
     /**
@@ -51,10 +52,19 @@ class SocialAuthController extends Controller
             // Log in the merchant using the 'merchant' guard
             Auth::guard('merchant')->login($merchant, true);
 
-            return redirect('/dashboard')->with('success', 'Selamat datang, ' . $merchant->business_name . '!');
+            return redirect('/')->with('success', 'Selamat datang, ' . $merchant->business_name . '!');
 
         } catch (\Exception $e) {
+            dd($e->getMessage());
             return redirect('/signin')->with('error', 'Login dengan Google gagal. Silakan coba lagi.');
         }
+    }
+
+    public function logout(Request $request)
+    {
+        Auth::guard('merchant')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect('/');
     }
 }

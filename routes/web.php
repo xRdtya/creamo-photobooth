@@ -8,12 +8,14 @@ Route::get('/', function() {
     return view("landing");
 });
 
-Route::get('/signin', function() {
-    return view("auth.signin");
-});
-
-Route::get('/signup', function() {
-    return view("auth.signup");
+Route::middleware(['guest:merchant'])->group(function() {
+    Route::get('/signin', function() {
+        return view("auth.signin");
+    })->name('login');
+    
+    Route::get('/signup', function() {
+        return view("auth.signup");
+    });
 });
 
 // Google OAuth Routes
@@ -38,9 +40,11 @@ Route::get('/photo/status/{Order_id}', function($order_id) {
         'payment_status' => $order ? $order->payment_status : 'not_found'
     ]);
 });
-Route::get('/photo/shoot', function() {
+Route::post('/photo/shoot', function() {
     return view("Customer.shoot");
 });
+
+Route::get('/logout', [SocialAuthController::class, 'logout']);
 
 Route::get('/token', function() { 
     return array('csrf'=>csrf_token());

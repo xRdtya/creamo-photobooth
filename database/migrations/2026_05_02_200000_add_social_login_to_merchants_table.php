@@ -13,6 +13,7 @@ return new class extends Migration
             $table->string('avatar')->nullable()->after('google_id');
             $table->string('password')->nullable()->change();
             $table->string('business_name')->nullable()->change();
+            $table->rememberToken();
         });
     }
 

@@ -12,11 +12,11 @@
 </head>
 <body style="background-image: url(/assets/img/bg.png)" class="min-h-screen bg-no-repeat bg-cover bg-center flex justify-center items-center font-montserrat py-10">
     
-    <div class="w-11/12 max-w-[1200px] min-h-[700px] flex rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] bg-white/40 backdrop-blur-lg border border-white/50 overflow-hidden relative">
+    <div class="w-11/12 max-w-300 min-h-175 flex rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] bg-white/40 backdrop-blur-lg border border-white/50 overflow-hidden relative">
         
         <!-- Left Side: Logo Area -->
         <div class="hidden lg:flex flex-col justify-center items-center w-1/2 p-12 relative z-10">
-            <div class="w-full max-w-[400px]">
+            <div class="w-full max-w-100">
                 <img src="/assets/img/logocreamo.png" alt="Creamo Logo" class="w-full drop-shadow-md">
                 <p class="text-[#3b4b86] text-3xl font-medium mt-2 tracking-wide text-center">Create a moment</p>
             </div>
@@ -24,7 +24,7 @@
 
         <!-- Right Side: Form Area -->
         <div class="w-full lg:w-1/2 flex justify-center items-center p-6 md:p-12 relative z-10">
-            <div class="bg-white w-full max-w-[500px] rounded-[30px] shadow-2xl p-8 md:p-12">
+            <div class="bg-white w-full max-w-125 rounded-[30px] shadow-2xl p-8 md:p-12">
                 
                 <h2 class="text-[32px] font-bold text-black mb-1">Sign In</h2>
                 <p class="text-gray-400 text-[13px] mb-8 font-medium">We missed you! Please enter your details</p>
@@ -56,9 +56,9 @@
 
                     <!-- Divider -->
                     <div class="flex items-center mb-6">
-                        <div class="flex-grow border-t border-gray-300"></div>
+                        <div class="grow border-t border-gray-300"></div>
                         <span class="mx-4 text-xs font-bold text-gray-800">Or with</span>
-                        <div class="flex-grow border-t border-gray-300"></div>
+                        <div class="grow border-t border-gray-300"></div>
                     </div>
 
                     <!-- Social Buttons -->
@@ -74,7 +74,7 @@
                     </div>
 
                     <!-- Submit Button -->
-                    <button type="button" onclick="alert('Sign In simulasi berhasil!')" class="w-full text-white bg-[#172b4d] hover:bg-[#101f38] font-medium rounded-lg text-sm px-5 py-3 text-center transition-colors shadow-md">
+                    <button type="button" class="w-full text-white bg-[#172b4d] hover:bg-[#101f38] font-medium rounded-lg text-sm px-5 py-3 text-center transition-colors shadow-md">
                         Sign In
                     </button>
                     
