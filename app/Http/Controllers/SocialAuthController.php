@@ -6,7 +6,6 @@ use App\Models\Merchant;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Auth;
-use Laravel\Prompts\Prompt;
 
 class SocialAuthController extends Controller
 {
@@ -114,5 +113,11 @@ class SocialAuthController extends Controller
         }
     }
 
-    
+    public function logout(Request $request)
+    {
+        Auth::guard('merchant')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect('/');
+    }
 }

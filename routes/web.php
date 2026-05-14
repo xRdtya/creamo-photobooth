@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PhotoSessionController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\SocialAuthController;
 use Illuminate\Support\Facades\Route;
@@ -45,9 +46,18 @@ Route::get('/photo/status/{Order_id}', function($order_id) {
         'payment_status' => $order ? $order->payment_status : 'not_found'
     ]);
 });
-Route::post('/photo/shoot', function() {
-    return view("Customer.shoot");
+Route::post('/photo/shoot/{Order_id}', function($order_id) {
+    $order = \App\Models\Transaction::where('order_id', $order_id)->firstOrFail();
+
+    if ($order->payment_status !== 'success') {
+        return redirect('/photo')->with('error', 'Silahkan bayar terlebih dahulu.');
+    }
+    return view("Customer.shoot", compact('order'));
 });
+
+Route::post('/photo/upload', [PhotoSessionController::class, 'upload']);
+
+Route::post('/photo/select-frame/{Order_id}', [PhotoSessionController::class, 'index']);
 
 Route::get('/logout', [SocialAuthController::class, 'logout']);
 

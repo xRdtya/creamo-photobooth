@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -134,7 +134,7 @@
                         <p class="font-montserrat text-secondary font-light text-lg">Jalan Pelita Blok D No. 9, Banjarbaru <br>Kalimantan Selatan. Indonesia.</p>
                         <br>
                         <p class="font-montserrat text-secondary font-light text-lg">creamophotography@gmail.com</p>
-                        <p class="font-montserrat text-secondary font-light text-lg">085248713983</p>
+                        <p class="font-montserrat text-secondary font-light text-lg">0852-4871-3983</p>
                     </div>
                 </div>
                 <small class="font-montserrat text-primary font-extralight bottom-3 left-12 absolute">&copy; 2026 Creamo, All rights reserved.</small>
