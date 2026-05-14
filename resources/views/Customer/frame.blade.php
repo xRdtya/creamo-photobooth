@@ -9,68 +9,40 @@
     <link rel="shortcut icon" href="/assets/img/logo.svg" type="image/x-icon">
 </head>
 <body style="background-image: url(/assets/img/bg.png)" class="relative h-screen bg-no-repeat bg-cover flex justify-center items-center">
-    <!-- Kanvas Utama: Ganti 'bg-pattern.jpg' dengan tekstur grain/pastel milikmu -->
     <section style="background-image: url(/assets/img/bg2.png)" class="relative w-11/12 h-11/12 max-w-4xl backdrop-blur-md rounded-[2.5rem] shadow-2xl p-10 pb-20 border border-white/60">
-        <!-- Identitas Kiri Atas -->
         <div class="absolute top-8 left-10">
-            <!-- Sesuaikan dengan file logo aslimu jika ada -->
             <img src="/assets/img/logocreamo.png" class="w-[40%]" alt="Logo">
             <p class="font-montserrat text-queaternary text-xl">Create a moment</p>
         </div>
-
-        <!-- Headline -->
         <h2 class="text-center text-2xl font-bold text-blue-900 mt-12 mb-10">Pilih Bingkai Foto Favoritmu</h2>
-
-        <!-- Panggung Interaksi (Carousel) -->
         <div class="flex items-center justify-center gap-12 h-[80%]">
-
-            <!-- Pemicu Kiri -->
             <button id="btnPrev" type="button" class="transition-transform hover:-translate-x-2 active:scale-95 drop-shadow-lg">
                 <svg class="w-16 h-16 text-blue-900" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M20 4L4 12L20 20Z" />
                 </svg>
             </button>
-
-            <!-- Tampilan Photostrip -->
             <div class="relative aspect-1/3 rounded-lg overflow-hidden h-full w-[30%]">
-                
-                <!-- Lapisan Frame (Transparan) -->
                 <img id="displayFrame" src="{{ asset('assets/img/frames/' . $frames[0]['image']) }}" class="absolute inset-0 w-full h-full z-20 object-cover pointer-events-none">
-
-                <!-- Container Foto (Layer Z-10) -->
-                <!-- Container Utama (Harus relative) -->
                 <div class="absolute inset-0 z-10">
-                    
-                    <!-- Foto 1: Atur 'top' untuk naik/turun -->
                     <div class="absolute left-1/2 -translate-x-1/2 top-[3.6%] w-[80%] aspect-5/4 overflow-hidden">
                         <img src="{{ asset('storage/' . $photos[0]) }}" class="w-full h-full object-cover">
                     </div>
-
-                    <!-- Foto 2: Atur 'top' agar pas di lubang tengah -->
                     <div class="absolute left-1/2 -translate-x-1/2 top-[32%] w-[80%] aspect-5/4 overflow-hidden">
                         <img src="{{ asset('storage/' . $photos[1]) }}" class="w-full h-full object-cover">
                     </div>
-
-                    <!-- Foto 3: Atur 'top' agar pas di lubang bawah -->
                     <div class="absolute left-1/2 -translate-x-1/2 top-[60%] w-[80%] aspect-5/4 overflow-hidden">
                         <img src="{{ asset('storage/' . $photos[2]) }}" class="w-full h-full object-cover">
                     </div>
 
                 </div>
             </div>
-
-            <!-- Pemicu Kanan -->
             <button id="btnNext" type="button" class="transition-transform hover:translate-x-2 active:scale-95 drop-shadow-lg">
                 <svg class="w-16 h-16 text-blue-900" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M4 4L20 12L4 20Z" />
                 </svg>
             </button>
-
         </div>
-
-        <!-- Kendali Bawah Kiri (Retake) -->
         <div class="absolute bottom-10 left-10">
-            <!-- Ganti href dengan rute untuk mengulang foto -->
             <form method="POST"  action="/photo/shoot/{{ $orderId }}" class="flex items-center justify-center w-14 h-14 border-[3px] border-blue-900 text-blue-900 rounded-full hover:bg-blue-900 hover:text-white transition-colors shadow-md">
                 @csrf
                 <button type="submit">
@@ -80,12 +52,9 @@
                 </button>
             </form>
         </div>
-
-        <!-- Kendali Eksekusi Tengah (Submit) -->
         <div class="absolute bottom-8 left-1/2 -translate-x-1/2">
             <form method="POST" action="/photo/save-frame/{{ $orderId }}">
                 @csrf
-                <!-- Nilai ini akan diubah oleh JavaScript -->
                 <input type="hidden" name="selected_frame" id="selectedFrameId" value="{{ $frames[0]['id'] }}">
                 
                 <button type="submit" class="flex items-center justify-center w-12 h-12 bg-blue-900 text-white rounded-full hover:scale-110 transition-transform shadow-xl">
@@ -97,38 +66,31 @@
         </div>
     </section>
     <script>
-        // 1. Ambil data frames dari PHP ke JavaScript
         const frames = @json($frames);
         let currentIndex = 0;
 
-        // 2. Referensi elemen
         const displayFrame = document.getElementById('displayFrame');
         const selectedFrameIdInput = document.getElementById('selectedFrameId');
         const btnNext = document.getElementById('btnNext');
         const btnPrev = document.getElementById('btnPrev');
 
-        // 3. Fungsi untuk mengupdate tampilan
         function updateFrame(index) {
-            // Update gambar frame
             displayFrame.src = `/assets/img/frames/${frames[index].image}`;
-            // Update hidden input agar saat disave, ID yang benar yang terkirim
             selectedFrameIdInput.value = frames[index].id;
         }
 
-        // 4. Event Listener Tombol Kanan (Next)
         btnNext.addEventListener('click', () => {
             currentIndex++;
             if (currentIndex >= frames.length) {
-                currentIndex = 0; // Balik ke awal jika sudah di ujung
+                currentIndex = 0;
             }
             updateFrame(currentIndex);
         });
 
-        // 5. Event Listener Tombol Kiri (Prev)
         btnPrev.addEventListener('click', () => {
             currentIndex--;
             if (currentIndex < 0) {
-                currentIndex = frames.length - 1; // Balik ke akhir jika mundur dari awal
+                currentIndex = frames.length - 1;
             }
             updateFrame(currentIndex);
         });

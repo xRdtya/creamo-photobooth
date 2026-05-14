@@ -14,10 +14,8 @@ class PhotoSessionController extends Controller
     {
         $transaction = Transaction::where('order_id', $orderId)->firstOrFail();
 
-        // 2. Ambil data session foto yang baru saja disimpan
         $session = PhotoSession::where('transaction_id', $transaction->id)->firstOrFail();
 
-        // 3. Pecah string link_file_foto menjadi array
         $photos = explode(',', $session->link_file_foto);
 
         $frames = [
@@ -36,7 +34,6 @@ class PhotoSessionController extends Controller
             $orderId = $request->order_id;
             $index = $request->photo_index;
 
-            // 1. Proses Save File ke Storage
             $img = str_replace('data:image/png;base64,', '', $img);
             $img = str_replace(' ', '+', $img);
             $data = base64_decode($img);
@@ -45,11 +42,8 @@ class PhotoSessionController extends Controller
             $fullPath = "photos/" . $orderId . "/" . $fileName;
             Storage::disk('public')->put($fullPath, $data);
 
-            // 2. Ambil Transaksi
             $transaction = Transaction::where('order_id', $orderId)->firstOrFail();
 
-            // 3. Update atau Buat Data PhotoSession
-            // Kita cari berdasarkan transaction_id agar tetap 1 baris per sesi
             $session = PhotoSession::firstOrNew(['transaction_id' => $transaction->id]);
 
             if (!$session->exists) {
@@ -59,11 +53,8 @@ class PhotoSessionController extends Controller
                 $session->status_cetak = 'pending';
             }
 
-            // 4. Masukkan Path Foto ke Kolom link_file_foto
             $currentPhotos = $session->link_file_foto ? explode(',', $session->link_file_foto) : [];
 
-            // Cek supaya tidak duplikat jika user menekan next berkali-kali pada index yang sama
-            // atau kita bisa gunakan index sebagai key jika mau lebih rapi
             $currentPhotos[$index - 1] = $fullPath;
 
             $session->link_file_foto = implode(',', $currentPhotos);
