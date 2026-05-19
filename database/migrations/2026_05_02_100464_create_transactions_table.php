@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->string('order_id')->unique();
-            $table->foreignId('merchant_id')->constrained('merchants');
+            $table->foreignId('merchant_id')->constrained('merchants')->cascadeOnDelete();
             $table->enum('payment_status', ['pending', 'success', 'failed'])->default('pending');
             $table->integer('gross_amount');
             $table->string('qris_reference')->nullable();
