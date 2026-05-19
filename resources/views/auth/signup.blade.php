@@ -32,10 +32,22 @@
                 <form action="/signup" method="POST" class="w-full">
                     @csrf
                     
+                    @if ($errors->any())
+                        <div class="mb-4 p-3 bg-red-100 text-red-600 text-[13px] font-medium rounded-lg">
+                            {{ $errors->first() }}
+                        </div>
+                    @endif
+                    
+                    <!-- Business Name Input -->
+                    <div class="mb-5">
+                        <label for="business_name" class="block mb-2 text-[13px] font-bold text-gray-800">Business Name</label>
+                        <input type="text" id="business_name" name="business_name" class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#172b4d] focus:border-transparent outline-none transition-all text-sm text-gray-800" required>
+                    </div>
+
                     <!-- Email Input -->
                     <div class="mb-5">
-                        <label for="email" class="block mb-2 text-[13px] font-bold text-gray-800">Email or Phone</label>
-                        <input type="text" id="email" name="email" class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#172b4d] focus:border-transparent outline-none transition-all text-sm text-gray-800" required>
+                        <label for="email" class="block mb-2 text-[13px] font-bold text-gray-800">Email Address</label>
+                        <input type="email" id="email" name="email" class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#172b4d] focus:border-transparent outline-none transition-all text-sm text-gray-800" required>
                     </div>
 
                     <!-- Password Input -->
@@ -80,7 +92,7 @@
                     </div>
 
                     <!-- Submit Button -->
-                    <button type="button" onclick="alert('Sign Up simulasi berhasil!')" class="w-full text-white bg-[#172b4d] hover:bg-[#101f38] font-medium rounded-lg text-sm px-5 py-3 text-center transition-colors shadow-md">
+                    <button type="submit" class="w-full text-white bg-[#172b4d] hover:bg-[#101f38] font-medium rounded-lg text-sm px-5 py-3 text-center transition-colors shadow-md">
                         Sign Up
                     </button>
                     
