@@ -3,6 +3,8 @@
 use App\Http\Controllers\PhotoSessionController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\SocialAuthController;
+use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\DevicePingController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function() {
@@ -14,9 +16,13 @@ Route::middleware(['guest:merchant'])->group(function() {
         return view("auth.signin");
     })->name('login');
     
+    Route::post('/signin', [\App\Http\Controllers\AuthController::class, 'signin']);
+
     Route::get('/signup', function() {
         return view("auth.signup");
     });
+
+    Route::post('/signup', [\App\Http\Controllers\AuthController::class, 'signup']);
 });
 
 // Google OAuth Routes
@@ -28,10 +34,12 @@ Route::get('/auth/apple/redirect', [SocialAuthController::class, 'redirectToAppl
 Route::get('/auth/apple/callback', [SocialAuthController::class, 'handleAppleCallback']);
 Route::post('/auth/apple/callback', [SocialAuthController::class, 'handleAppleCallback']);
 
-// Temporary dashboard placeholder after login
-Route::get('/dashboard', function() {
-    return 'Login berhasil! Dashboard akan dibuat segera.';
-})->middleware('auth:merchant');
+// Admin Dashboard
+Route::middleware('auth:merchant')->group(function () {
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/active-devices', [AdminDashboardController::class, 'activeDevices'])->name('dashboard.active-devices');
+});
+
 
 Route::get('/photo', function() {
     return view("Customer.frontPage");
@@ -58,6 +66,14 @@ Route::post('/photo/shoot/{Order_id}', function($order_id) {
 Route::post('/photo/upload', [PhotoSessionController::class, 'upload']);
 
 Route::post('/photo/select-frame/{Order_id}', [PhotoSessionController::class, 'index']);
+
+// ── Device Heartbeat (dipanggil oleh device photobooth) ──────────────────────
+Route::post('/photo/device/ping',     [DevicePingController::class, 'ping']);
+Route::post('/photo/device/ping-off', [DevicePingController::class, 'pingOff']);
+
+// ── DEV ONLY: simulasi device aktif langsung dari browser ───────────────────
+// Hapus route ini sebelum production!
+Route::get('/photo/device/test-ping', [DevicePingController::class, 'testPing'])->name('device.test-ping');
 
 Route::get('/logout', [SocialAuthController::class, 'logout']);
 

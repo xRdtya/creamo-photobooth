@@ -7,14 +7,31 @@ use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Auth;
 
+
 class SocialAuthController extends Controller
 {
+    /**
+     * Dapatkan base URL yang benar berdasarkan host request.
+     * TrustProxies(at: '*') di bootstrap/app.php sudah memastikan
+     * X-Forwarded-Host dan X-Forwarded-Proto dari ngrok terbaca dengan benar,
+     * sehingga getSchemeAndHttpHost() mengembalikan URL ngrok yang tepat.
+     */
+    private function getBaseUrl(): string
+    {
+        return request()->getSchemeAndHttpHost();
+    }
+
     /**
      * Redirect user to Google for authentication.
      */
     public function redirectToGoogle()
     {
-        return Socialite::driver('google')->with(['prompt' => 'select_account'])->redirect();
+        $callbackUrl = $this->getBaseUrl() . '/auth/google/callback';
+
+        return Socialite::driver('google')
+            ->redirectUrl($callbackUrl)
+            ->with(['prompt' => 'select_account'])
+            ->redirect();
     }
 
     /**
@@ -23,7 +40,12 @@ class SocialAuthController extends Controller
     public function handleGoogleCallback()
     {
         try {
-            $googleUser = Socialite::driver('google')->stateless()->user();
+            $callbackUrl = $this->getBaseUrl() . '/auth/google/callback';
+
+            $googleUser = Socialite::driver('google')
+                ->redirectUrl($callbackUrl)
+                ->stateless()
+                ->user();
 
             // Find existing merchant by google_id or email
             $merchant = Merchant::where('google_id', $googleUser->getId())
@@ -51,11 +73,10 @@ class SocialAuthController extends Controller
             // Log in the merchant using the 'merchant' guard
             Auth::guard('merchant')->login($merchant, true);
 
-            return redirect('/')->with('success', 'Selamat datang, ' . $merchant->business_name . '!');
+            return redirect('/dashboard')->with('success', 'Selamat datang, ' . $merchant->business_name . '!');
 
         } catch (\Exception $e) {
-            dd($e->getMessage());
-            return redirect('/signin')->with('error', 'Login dengan Google gagal. Silakan coba lagi.');
+            return redirect('/signin')->with('error', 'Login dengan Google gagal: ' . $e->getMessage());
         }
     }
 
@@ -64,7 +85,11 @@ class SocialAuthController extends Controller
      */
     public function redirectToApple()
     {
-        return Socialite::driver('apple')->redirect();
+        $callbackUrl = $this->getBaseUrl() . '/auth/apple/callback';
+
+        return Socialite::driver('apple')
+            ->redirectUrl($callbackUrl)
+            ->redirect();
     }
 
     /**
@@ -73,7 +98,13 @@ class SocialAuthController extends Controller
     public function handleAppleCallback(Request $request)
     {
         try {
-            $appleUser = Socialite::driver('apple')->stateless()->user();
+            $callbackUrl = $this->getBaseUrl() . '/auth/apple/callback';
+
+            $appleUser = Socialite::driver('apple')
+                ->redirectUrl($callbackUrl)
+                ->stateless()
+                ->user();
+
 
             // Find existing merchant by apple_id or email
             $merchant = Merchant::where('apple_id', $appleUser->getId())

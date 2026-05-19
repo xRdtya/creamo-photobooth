@@ -9,4 +9,14 @@ class Transaction extends Model
     protected $guarded = [
         'id'
     ];
+
+    public function photoSessions()
+    {
+        return $this->hasMany(PhotoSession::class);
+    }
+
+    public function merchant()
+    {
+        return $this->belongsTo(Merchant::class);
+    }
 }
