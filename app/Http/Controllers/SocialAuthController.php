@@ -73,7 +73,7 @@ class SocialAuthController extends Controller
             // Log in the merchant using the 'merchant' guard
             Auth::guard('merchant')->login($merchant, true);
 
-            return redirect('/dashboard')->with('success', 'Selamat datang, ' . $merchant->business_name . '!');
+            return redirect('/')->with('success', 'Selamat datang, ' . $merchant->business_name . '!');
 
         } catch (\Exception $e) {
             return redirect('/signin')->with('error', 'Login dengan Google gagal: ' . $e->getMessage());
@@ -137,7 +137,7 @@ class SocialAuthController extends Controller
             // Log in the merchant using the 'merchant' guard
             Auth::guard('merchant')->login($merchant, true);
 
-            return redirect('/dashboard')->with('success', 'Selamat datang, ' . $merchant->business_name . '!');
+            return redirect('/')->with('success', 'Selamat datang, ' . $merchant->business_name . '!');
 
         } catch (\Exception $e) {
             return redirect('/signin')->with('error', 'Login dengan Apple gagal. Silakan coba lagi.');

@@ -41,7 +41,7 @@ class TransactionController extends Controller
 
         Transaction::create([
             'order_id' => $orderId,
-            'merchant_id' => '1',
+            'merchant_id' => $request->merchant_id,
             'gross_amount' => $params['transaction_details']['gross_amount'],
             'payment_status' => 'pending',
             'qris_reference' => $qr_url

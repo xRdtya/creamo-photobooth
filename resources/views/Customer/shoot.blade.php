@@ -9,7 +9,7 @@
     <title>CREAMO | Create a Moment</title>
     <link rel="shortcut icon" href="/assets/img/logo.svg" type="image/x-icon">
 </head>
-<body style="background-image: url(/assets/img/bg.png)" class="h-screen bg-no-repeat bg-cover flex justify-center">
+<body style="background-image: url(/assets/img/bg.png)" class="h-screen! bg-no-repeat bg-cover flex justify-center">
     <section style="background-image: url(/assets/img/bg2.png)" class="h-[80vh] m-auto w-11/12 rounded-[50px] shadow-2xl/50 bg-no-repeat bg-cover flex justify-center items-center">
         <div class="w-213.25 bg-[#e5e5e5] rounded-xl shadow-2xl/30 overflow-hidden relative">
             
@@ -25,7 +25,7 @@
                     <div id="statusUI" class="hidden flex gap-3 ml-4 bg-black/10 px-3 py-0.5 rounded-full border border-gray-400">
                         <span id="timerDisplay" class="text-red-600 font-black text-sm">3</span>
                         <span class="text-gray-400">|</span>
-                        <span class="text-[#4d4d4d] font-bold text-sm"><span id="counterDisplay">0</span>/3</span>
+                        <span class="text-[#4d4d4d] font-bold text-sm"><span id="counterDisplay">0</span>/4</span>
                     </div>
                 </div>
             </div>
@@ -57,6 +57,7 @@
         <input type="hidden" name="order_id" value="{{ $order->order_id }}">
     </form>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         const video = document.getElementById('videoElement');
         const canvas = document.getElementById('canvasElement');
@@ -71,8 +72,9 @@
         const nextBtn = document.getElementById('nextBtn');
 
         let currentImageData = null;
+        let capturedPhotos = [];
         let photoCount = 0;
-        const maxPhotos = 3;
+        const maxPhotos = 4;
         let timeLeft = 3;
         let timerInterval;
 
@@ -128,30 +130,51 @@
         nextBtn.addEventListener('click', async function() {
             if (!currentImageData) return;
 
-            nextBtn.innerText = "SAVING...";
-            nextBtn.disabled = true;
+            capturedPhotos.push(currentImageData);
+            
+            photoCount++;
+            counterDisplay.innerText = photoCount;
+            previewContainer.classList.add('hidden');
 
-            const isSaved = await savePhotoToServer(currentImageData);
-
-            if (isSaved) {
-                console.log("Berhasil simpan foto ke-" + (photoCount + 1));
-                
-                previewContainer.classList.add('hidden');
-                nextBtn.innerText = "Next";
-                nextBtn.disabled = false;
-
-                photoCount++;
-                counterDisplay.innerText = photoCount;
-
-                if (photoCount < maxPhotos) {
-                    startTimer();
-                } else {
-                    document.getElementById('redirectForm').submit();
-                }
+            if (photoCount < maxPhotos) {
+                startTimer();
             } else {
-                nextBtn.innerText = "Next";
-                nextBtn.disabled = false;
-                alert("Gagal menyimpan, silakan coba lagi.");
+                nextBtn.innerText = "SAVING...";
+                nextBtn.disabled = true;
+
+                Swal.fire({
+                    title: 'Menyimpan Foto...',
+                    html: 'Mohon tunggu sebentar, sedang memproses ke sistem.',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                const isSaved = await uploadAllPhotosToServer();
+
+                Swal.close();
+
+                if (isSaved) {
+                    console.log("Semua foto berhasil disimpan!");
+                    document.getElementById('redirectForm').submit();
+                } else {
+                    nextBtn.innerText = "Next";
+                    nextBtn.disabled = false;
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Waduh, Gagal!',
+                        text: 'Gagal menyimpan ke server. Silakan coba lagi.',
+                        confirmButtonColor: '#1e3a8a'
+                    });
+                    
+                    capturedPhotos.pop(); 
+                    photoCount--; 
+                    counterDisplay.innerText = photoCount;
+                    previewContainer.classList.remove('hidden');
+                }
             }
         });
 
@@ -160,25 +183,23 @@
             startTimer();
         });
 
-        async function savePhotoToServer(imageData) {
+        async function uploadAllPhotosToServer() {
             try {
                 const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                 
-                const response = await fetch('/photo/upload', {
+                const response = await fetch('/photo/upload', { 
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': token
                     },
                     body: JSON.stringify({
-                        image: imageData,
                         order_id: orderId,
-                        photo_index: photoCount + 1
+                        photos: capturedPhotos
                     })
                 });
 
                 const result = await response.json();
-                
                 return result.success === true; 
 
             } catch (error) {

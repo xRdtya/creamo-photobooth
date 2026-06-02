@@ -21,19 +21,21 @@
                     <path d="M20 4L4 12L20 20Z" />
                 </svg>
             </button>
-            <div class="relative aspect-1/3 rounded-lg overflow-hidden h-full w-[30%]">
+            <div class="relative aspect-1/3 rounded-lg overflow-hidden h-full">
                 <img id="displayFrame" src="{{ asset('assets/img/frames/' . $frames[0]['image']) }}" class="absolute inset-0 w-full h-full z-20 object-cover pointer-events-none">
                 <div class="absolute inset-0 z-10">
-                    <div class="absolute left-1/2 -translate-x-1/2 top-[3.6%] w-[80%] aspect-5/4 overflow-hidden">
+                    <div class="absolute left-1/2 -translate-x-1/2 top-[8%] w-[80%] overflow-hidden">
                         <img src="{{ asset('storage/' . $photos[0]) }}" class="w-full h-full object-cover">
                     </div>
-                    <div class="absolute left-1/2 -translate-x-1/2 top-[32%] w-[80%] aspect-5/4 overflow-hidden">
+                    <div class="absolute left-1/2 -translate-x-1/2 top-[26.7%] w-[80%] overflow-hidden">
                         <img src="{{ asset('storage/' . $photos[1]) }}" class="w-full h-full object-cover">
                     </div>
-                    <div class="absolute left-1/2 -translate-x-1/2 top-[60%] w-[80%] aspect-5/4 overflow-hidden">
+                    <div class="absolute left-1/2 -translate-x-1/2 top-[45.5%] w-[80%] overflow-hidden">
                         <img src="{{ asset('storage/' . $photos[2]) }}" class="w-full h-full object-cover">
                     </div>
-
+                    <div class="absolute left-1/2 -translate-x-1/2 top-[64%] w-[80%] overflow-hidden">
+                        <img src="{{ asset('storage/' . $photos[3]) }}" class="w-full h-full object-cover">
+                    </div>
                 </div>
             </div>
             <button id="btnNext" type="button" class="transition-transform hover:translate-x-2 active:scale-95 drop-shadow-lg">
@@ -43,7 +45,7 @@
             </button>
         </div>
         <div class="absolute bottom-10 left-10">
-            <form method="POST"  action="/photo/shoot/{{ $orderId }}" class="flex items-center justify-center w-14 h-14 border-[3px] border-blue-900 text-blue-900 rounded-full hover:bg-blue-900 hover:text-white transition-colors shadow-md">
+            <form method="POST" action="/photo/shoot/{{ $order->order_id }}" class="flex items-center justify-center w-14 h-14 border-[3px] border-blue-900 text-blue-900 rounded-full hover:bg-blue-900 hover:text-white transition-colors shadow-md">
                 @csrf
                 <button type="submit">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -53,7 +55,7 @@
             </form>
         </div>
         <div class="absolute bottom-8 left-1/2 -translate-x-1/2">
-            <form method="POST" action="/photo/save-frame/{{ $orderId }}">
+            <form method="POST" action="/photo/save-frame/{{ $order->order_id }}">
                 @csrf
                 <input type="hidden" name="selected_frame" id="selectedFrameId" value="{{ $frames[0]['id'] }}">
                 
