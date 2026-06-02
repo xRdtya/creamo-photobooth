@@ -67,6 +67,7 @@ Route::post('/photo/upload', [PhotoSessionController::class, 'upload']);
 
 Route::post('/photo/select-frame/{Order_id}', [PhotoSessionController::class, 'index']);
 Route::post('/photo/save-frame/{Order_id}', [PhotoSessionController::class, 'saveFrame'])->name('photo.save-frame');
+Route::get('/photo/success/{Order_id}', [PhotoSessionController::class, 'success'])->name('photo.success');
 
 // ── Device Heartbeat (dipanggil oleh device photobooth) ──────────────────────
 Route::post('/photo/device/ping',     [DevicePingController::class, 'ping']);

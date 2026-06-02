@@ -5,8 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PhotoSession;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
-use Intervention\Image\ImageManager;
-use Intervention\Image\Drivers\Gd\Driver;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 
 class PhotoSessionController extends Controller
@@ -20,9 +19,9 @@ class PhotoSessionController extends Controller
         $photos = explode(',', $session->link_file_foto);
 
         $frames = [
-            ['id' => 1, 'name' => 'Classic White', 'image' => '7.png', 'color' => '#FFFFFF'],
-            ['id' => 2, 'name' => 'Retro Film', 'image' => '8.png', 'color' => '#1A1A1A'],
-            ['id' => 3, 'name' => 'Soft Pastel', 'image' => '9.png', 'color' => '#FFD1DC'],
+            ['id' => 1, 'name' => 'Classic White', 'image' => '1.png', 'color' => '#FFFFFF'],
+            ['id' => 2, 'name' => 'Retro Film', 'image' => '2.png', 'color' => '#1A1A1A'],
+            ['id' => 3, 'name' => 'Soft Pastel', 'image' => '3.png', 'color' => '#FFD1DC'],
         ];
     
         return view('Customer.frame', compact('frames', 'photos', 'order', 'session'));
@@ -94,54 +93,121 @@ class PhotoSessionController extends Controller
             $transaction = Transaction::where('order_id', $orderId)->firstOrFail();
             $session = PhotoSession::where('transaction_id', $transaction->id)->firstOrFail();
 
-            $session->email = $request->email;
-
-            $manager = new ImageManager(new Driver());
-
             $frameName = $request->selected_frame;
-            if (!str_contains($frameName, '.png')) {
-                $frameName .= '.png';
-            }
-            $framePath = public_path('assets/img/frames/' . $frameName);
+            $framePath = public_path('/assets/img/frames/' . $frameName . '.png');
 
             if (!file_exists($framePath)) {
-                return back()->withErrors(['error' => 'File frame tidak ditemukan di: ' . $framePath]);
+                return redirect('/photo')->withErrors(['error' => 'File frame tidak ditemukan']);
             }
 
-            $frameImage = $manager->read($framePath);
-            $frameWidth = $frameImage->width();
-            $frameHeight = $frameImage->height();
+            // 1. Ambil info ukuran asli dari file Frame yang diupload
+            $frameImg = imagecreatefrompng($framePath);
+            $frameWidth = imagesx($frameImg);
+            $frameHeight = imagesy($frameImg);
 
-            $canvas = $manager->create($frameWidth, $frameHeight)->fill('ffffff');
+            // 2. Buat Canvas kosong warna putih murni sesuai ukuran frame
+            $canvas = imagecreatetruecolor($frameWidth, $frameHeight);
+            $white = imagecolorallocate($canvas, 255, 255, 255);
+            imagefill($canvas, 0, 0, $white);
+
+            // Aktifkan mode transparansi agar PNG frame tidak rusak
+            imagealphablending($canvas, true);
+            imagesavealpha($canvas, true);
+
+            // =========================================================================
+            // 🔥 CONFIGURASI DIKOPEL LANGSUNG DARI TAILWIND PREVIEW LU
+            // =========================================================================
+            $widthPercent  = 0.80;   // Dari w-[80%]
+            $heightPercent = 0.175;  // Estimasi tinggi tiap kotak (17.5% dari total tinggi frame)
+            // *Silakan ubah angka 0.175 ini jika fotonya kurang tinggi/pendek
+
+            // Dari top-[8%], top-[26.7%], top-[45.5%], top-[64%]
+            $topPercentages = [0.08, 0.267, 0.455, 0.64];
+
+            // Konversi Persentase Tailwind menjadi Pixel Nyata (Dinamis)
+            $photoWidth  = (int)($frameWidth * $widthPercent);
+            $photoHeight = (int)($frameHeight * $heightPercent);
+            $xOffset     = (int)(($frameWidth - $photoWidth) / 2); // Efek dari left-1/2 -translate-x-1/2
+
+            $yOffsets = [];
+            foreach ($topPercentages as $pct) {
+                $yOffsets[] = (int)($frameHeight * $pct);
+            }
+            // =========================================================================
 
             $userPhotos = explode(',', $session->link_file_foto);
 
-            $photoWidth  = 864;  // Contoh lebar lubang foto (sesuaikan pixel asli)
-            $photoHeight = 580;  // Contoh tinggi lubang foto (sesuaikan pixel asli)
-            $xOffset     = 108;  // Jarak dari kiri frame ke lubang foto
-
-            $yOffsets = [
-                180,  // Batas atas kotak ke-1
-                820,  // Batas atas kotak ke-2
-                1460  // Batas atas kotak ke-3
-            ];
-
+            // 3. Looping & Potong Tengah Foto User
             foreach ($userPhotos as $index => $photoPath) {
-                if (isset($yOffsets[$index])) {
-                    $fullPath = storage_path('app/public/' . $photoPath);
+                if (isset($yOffsets[$index]) && !empty(trim($photoPath))) {
 
-                    if (file_exists($fullPath)) {
-                        $photo = $manager->read($fullPath);
+                    $cleanedPath = trim(str_replace(['public/', 'storage/'], '', $photoPath));
+                    $fullPath = Storage::disk('public')->path($cleanedPath);
 
-                        $photo->cover($photoWidth, $photoHeight);
+                    if (!file_exists($fullPath)) {
+                        return redirect('/photo')->withErrors([
+                            'error' => 'Foto ke-' . ($index + 1) . ' tidak ada di: ' . $fullPath
+                        ]);
+                    }
 
-                        $canvas->place($photo, 'top-left', $xOffset, $yOffsets[$index]);
+                    $info = getimagesize($fullPath);
+                    $srcImg = null;
+
+                    if ($info['mime'] == 'image/jpeg' || $info['mime'] == 'image/jpg') {
+                        $srcImg = imagecreatefromjpeg($fullPath);
+                    } elseif ($info['mime'] == 'image/png') {
+                        $srcImg = imagecreatefrompng($fullPath);
+                    }
+
+                    if ($srcImg) {
+                        $srcW = imagesx($srcImg);
+                        $srcH = imagesy($srcImg);
+
+                        // Rumus Crop Center (Cover) agar foto tidak gepeng
+                        $srcRatio = $srcW / $srcH;
+                        $dstRatio = $photoWidth / $photoHeight;
+
+                        if ($srcRatio > $dstRatio) {
+                            $cropH = $srcH;
+                            $cropW = (int)($srcH * $dstRatio);
+                            $srcX = (int)(($srcW - $cropW) / 2);
+                            $srcY = 0;
+                        } else {
+                            $cropW = $srcW;
+                            $cropH = (int)($srcW / $dstRatio);
+                            $srcX = 0;
+                            $srcY = (int)(($srcH - $cropH) / 2);
+                        }
+
+                        // Tempel foto user ke dalam Canvas di bawah frame
+                        imagecopyresampled(
+                            $canvas,
+                            $srcImg,
+                            $xOffset,
+                            $yOffsets[$index],
+                            $srcX,
+                            $srcY,
+                            $photoWidth,
+                            $photoHeight,
+                            $cropW,
+                            $cropH
+                        );
+                        imagedestroy($srcImg);
                     }
                 }
             }
 
-            $canvas->place($frameImage, 'top-left', 0, 0);
+            // 4. Tempelkan Frame Transparan paling atas (Menumpuk foto)
+            imagecopy($canvas, $frameImg, 0, 0, 0, 0, $frameWidth, $frameHeight);
+            imagedestroy($frameImg);
 
+            // 5. Ubah menjadi data PNG
+            ob_start();
+            imagepng($canvas);
+            $encodedImage = ob_get_clean();
+            imagedestroy($canvas);
+
+            // 6. Simpan hasil akhir
             $finalFileName = 'final_' . time() . '.png';
             $finalFolder = 'photos/' . $orderId;
             $finalFullPath = $finalFolder . '/' . $finalFileName;
@@ -150,15 +216,22 @@ class PhotoSessionController extends Controller
                 Storage::disk('public')->makeDirectory($finalFolder);
             }
 
-            Storage::disk('public')->put($finalFullPath, $canvas->toPng());
+            Storage::disk('public')->put($finalFullPath, $encodedImage);
 
             $session->link_hasil_final = $finalFullPath;
             $session->save();
-            dd('ERROR');
+
             return redirect()->route('photo.success', $orderId)->with('success', 'Foto berhasil digabungkan!');
         } catch (\Exception $e) {
-            dd('ERROR');
-            return back()->withErrors(['error' => 'Gagal memproses gambar: ' . $e->getMessage()]);
+            return redirect('/photo')->withErrors(['error' => 'Gagal menggabungkan: ' . $e->getMessage()]);
         }
+    }
+
+    public function success($orderId)
+    {
+        $order   = Transaction::where('order_id', $orderId)->firstOrFail();
+        $session = PhotoSession::where('transaction_id', $order->id)->firstOrFail();
+
+        dd('MANTAP MANIA');
     }
 }

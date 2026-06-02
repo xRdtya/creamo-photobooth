@@ -55,10 +55,10 @@
             </form>
         </div>
         <div class="absolute bottom-8 left-1/2 -translate-x-1/2">
-            <form method="POST" action="/photo/save-frame/{{ $order->order_id }}">
-                @csrf
+            <form action="/photo/save-frame/{{ $order->order_id }}" method="post">
+            @csrf
                 <input type="hidden" name="selected_frame" id="selectedFrameId" value="{{ $frames[0]['id'] }}">
-                
+                <input class="hidden" type="email" name="email" id="email" value="noufalraditya068@gmail.com">
                 <button type="submit" class="flex items-center justify-center w-12 h-12 bg-blue-900 text-white rounded-full hover:scale-110 transition-transform shadow-xl">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
