@@ -53,11 +53,11 @@
 
                     <!-- Term Checkbox -->
                     <div class="flex items-center mb-8">
-                        <div class="flex items-center justify-center w-5 h-5 border border-gray-300 rounded-full bg-white mr-2">
-                            <input id="term" type="checkbox" class="opacity-0 absolute w-5 h-5 cursor-pointer">
-                            <div class="w-3 h-3 rounded-full bg-[#172b4d] hidden peer-checked:block"></div>
+                        <div class="relative flex items-center justify-center w-5 h-5 border border-gray-300 rounded-full bg-white mr-2 cursor-pointer">
+                            <input id="term" type="checkbox" required class="peer opacity-0 absolute w-5 h-5 cursor-pointer" onchange="toggleSubmit(this,'submitBtn')">
+                            <div class="w-3 h-3 rounded-full bg-[#172b4d] hidden peer-checked:block pointer-events-none"></div>
                         </div>
-                        <label for="term" class="text-[13px] font-medium text-gray-800 cursor-pointer">I accept the <a href="#" class="text-[#0052cc] hover:underline">Term</a></label>
+                        <label for="term" class="text-[13px] font-medium text-gray-800 cursor-pointer">I accept the <a href="#" class="text-[#0052cc] hover:underline">term</a></label>
                     </div>
 
                     <!-- Divider -->
@@ -80,7 +80,8 @@
                     </div>
 
                     <!-- Submit Button -->
-                    <button type="submit" class="w-full text-white bg-[#172b4d] hover:bg-[#101f38] font-medium rounded-lg text-sm px-5 py-3 text-center transition-colors shadow-md">
+                    <button id="submitBtn" type="submit" disabled
+                        class="w-full font-medium rounded-lg text-sm px-5 py-3 text-center transition-all shadow-md bg-gray-300 text-gray-500 cursor-not-allowed disabled:opacity-60">
                         Sign In
                     </button>
                     
@@ -95,4 +96,16 @@
     </div>
 
 </body>
+<script>
+function toggleSubmit(checkbox, btnId) {
+    const btn = document.getElementById(btnId);
+    if (checkbox.checked) {
+        btn.disabled = false;
+        btn.className = 'w-full text-white bg-[#172b4d] hover:bg-[#101f38] font-medium rounded-lg text-sm px-5 py-3 text-center transition-all shadow-md cursor-pointer';
+    } else {
+        btn.disabled = true;
+        btn.className = 'w-full font-medium rounded-lg text-sm px-5 py-3 text-center transition-all shadow-md bg-gray-300 text-gray-500 cursor-not-allowed opacity-60';
+    }
+}
+</script>
 </html>

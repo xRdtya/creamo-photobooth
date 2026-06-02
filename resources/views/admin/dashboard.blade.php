@@ -37,7 +37,6 @@
             min-height: 100vh;
         }
 
-        /* ── SIDEBAR ────────────────────────────────────── */
         .sidebar {
             width: 240px;
             min-width: 240px;
@@ -394,6 +393,122 @@
             color: var(--muted); font-size: 14px;
         }
         .no-device i { font-size: 40px; margin-bottom: 12px; opacity:.35; display:block; }
+
+        /* ══ FULL-PAGE MODAL PANELS ══════════════════════════════ */
+        .panel-overlay {
+            position: fixed; inset: 0;
+            z-index: 2000;
+            display: flex;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity .3s;
+        }
+        .panel-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .panel-backdrop {
+            position: absolute; inset: 0;
+            background: rgba(15,20,40,.5);
+            backdrop-filter: blur(6px);
+        }
+        .panel-sheet {
+            position: relative;
+            margin: auto;
+            width: 96%;
+            max-width: 1000px;
+            max-height: 90vh;
+            background: #fff;
+            border-radius: 28px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 32px 80px rgba(0,0,0,.22);
+            transform: translateY(40px) scale(.97);
+            transition: transform .32s cubic-bezier(.34,1.28,.64,1);
+            overflow: hidden;
+        }
+        .panel-overlay.open .panel-sheet {
+            transform: translateY(0) scale(1);
+        }
+        .panel-head {
+            padding: 22px 28px 18px;
+            border-bottom: 1.5px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .panel-head-left { display: flex; align-items: center; gap: 14px; }
+        .panel-head-icon {
+            width: 42px; height: 42px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; color: #fff;
+        }
+        .panel-head h2 { font-size: 18px; font-weight: 800; color: var(--text); }
+        .panel-head-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+        .panel-close {
+            width: 36px; height: 36px;
+            border: none; background: #f1f5f9;
+            border-radius: 50%; cursor: pointer;
+            font-size: 15px; color: var(--muted);
+            display: flex; align-items: center; justify-content: center;
+            transition: background .2s, color .2s;
+        }
+        .panel-close:hover { background: #e2e8f0; color: var(--text); }
+        .panel-body {
+            padding: 24px 28px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .panel-summary {
+            display: flex; gap: 14px;
+            flex-wrap: wrap;
+            margin-bottom: 22px;
+        }
+        .panel-stat {
+            flex: 1; min-width: 130px;
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 16px 20px;
+            text-align: center;
+        }
+        .panel-stat .ps-val { font-size: 28px; font-weight: 800; color: var(--text); }
+        .panel-stat .ps-lbl { font-size: 11px; color: var(--muted); font-weight: 600; margin-top: 2px; }
+        .panel-stat .ps-badge { font-size: 11px; font-weight: 700; margin-top: 4px; }
+        .panel-table { width: 100%; border-collapse: collapse; }
+        .panel-table th {
+            text-align: left; font-size: 11px; font-weight: 700;
+            color: var(--muted); text-transform: uppercase; letter-spacing: .7px;
+            padding: 0 14px 12px; border-bottom: 1.5px solid var(--border);
+        }
+        .panel-table td {
+            padding: 13px 14px; font-size: 13px;
+            border-bottom: 1px solid #f1f5f9; color: var(--text);
+        }
+        .panel-table tr:last-child td { border-bottom: none; }
+        .panel-table tr:hover td { background: #fafbff; }
+        .panel-chart-wrap { position: relative; height: 260px; margin-bottom: 20px; }
+        .panel-filter-bar {
+            display: flex; gap: 10px; flex-wrap: wrap;
+            margin-bottom: 18px; align-items: center;
+        }
+        .filter-chip {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px; font-weight: 600;
+            border: 1.5px solid var(--border);
+            background: #fff; color: var(--muted);
+            cursor: pointer; transition: all .2s;
+        }
+        .filter-chip.active, .filter-chip:hover {
+            background: var(--accent); color: #fff; border-color: var(--accent);
+        }
+        .panel-empty {
+            text-align: center; padding: 48px 20px;
+            color: var(--muted); font-size: 14px;
+        }
+        .panel-empty i { font-size: 42px; margin-bottom: 14px; opacity: .3; display: block; }
     </style>
 </head>
 <body>
@@ -405,10 +520,11 @@
     <div class="sidebar-section-label">Menu</div>
     <ul class="sidebar-menu">
         <li><a href="{{ route('dashboard') }}" class="active"><i class="fas fa-th-large"></i> Dashboard</a></li>
-        <li><a href="#"><i class="fas fa-history"></i> Payment History</a></li>
-        <li><a href="#"><i class="fas fa-dollar-sign"></i> Revenue</a></li>
-        <li><a href="#"><i class="fas fa-star"></i> Rating</a></li>
-        <li><a href="#"><i class="fas fa-chart-bar"></i> Statistics</a></li>
+        <li><a href="#" onclick="openPanel('panelPayment');return false;"><i class="fas fa-history"></i> Payment History</a></li>
+        <li><a href="#" onclick="openPanel('panelRevenue');return false;"><i class="fas fa-dollar-sign"></i> Revenue</a></li>
+        <li><a href="#" onclick="openPanel('panelRating');return false;"><i class="fas fa-star"></i> Rating</a></li>
+        <li><a href="#" onclick="openPanel('panelStatistics');return false;"><i class="fas fa-chart-bar"></i> Statistics</a></li>
+        <li><a href="/photo"><i class="fas fa-camera"></i> Booth</a></li>
     </ul>
 
     <div class="sidebar-section-label">Others</div>
@@ -451,7 +567,7 @@
                     @endif
                     <div style="font-size:11px;color:var(--muted);margin-top:4px;">Sales this week — {{ now()->startOfWeek()->format('d M') }} – {{ now()->endOfWeek()->format('d M Y') }}</div>
                 </div>
-                <a href="#" class="btn-outline">View Report</a>
+                <a href="#" class="btn-outline" onclick="openPanel('panelRevenue');return false;">View Report</a>
             </div>
             <div class="chart-wrap">
                 <canvas id="revenueChart"></canvas>
@@ -462,25 +578,18 @@
             </div>
         </div>
 
-        <!-- Total Customer + Total Photo + Active Now -->
+        <!-- Total Customer + Total Photo -->
         <div class="stats-right">
-            <div class="stats-row">
-                <div class="stat-item">
-                    <div class="stat-icon green"><i class="fas fa-users"></i></div>
-                    <div class="stat-meta">
-                        <div class="label">Total Customers</div>
-                        <div class="val">{{ number_format($totalCustomers) }}</div>
-                        @if($customerGrowth >= 0)
-                            <span class="badge-up"><i class="fas fa-arrow-up"></i> {{ $customerGrowth }}% this month</span>
-                        @else
-                            <span class="badge-down"><i class="fas fa-arrow-down"></i> {{ abs($customerGrowth) }}% this month</span>
-                        @endif
-                    </div>
-                </div>
-                <div class="active-now" id="activeNowCard" onclick="openActiveModal()" title="Lihat device aktif">
-                    <div class="an-label">Active Now</div>
-                    <div class="an-val" id="activeNowCount">{{ $activeDeviceCount }}</div>
-                    <div class="an-hint"><span class="an-pulse"></span> device aktif</div>
+            <div class="stat-item">
+                <div class="stat-icon green"><i class="fas fa-users"></i></div>
+                <div class="stat-meta">
+                    <div class="label">Total Customers</div>
+                    <div class="val">{{ number_format($totalCustomers) }}</div>
+                    @if($customerGrowth >= 0)
+                        <span class="badge-up"><i class="fas fa-arrow-up"></i> {{ $customerGrowth }}% this month</span>
+                    @else
+                        <span class="badge-down"><i class="fas fa-arrow-down"></i> {{ abs($customerGrowth) }}% this month</span>
+                    @endif
                 </div>
             </div>
             <div class="stat-item">
@@ -502,7 +611,7 @@
     <div class="card" style="margin-bottom:20px;">
         <div class="card-header" style="margin-bottom:16px;">
             <div class="card-label" style="font-size:14px;font-weight:700;color:var(--text);">Deskripsi Customer</div>
-            <a href="#" class="btn-outline">View All</a>
+            <a href="#" class="btn-outline" onclick="openPanel('panelPayment');return false;">View All</a>
         </div>
         <div style="overflow-x:auto;">
             <table>
@@ -544,13 +653,14 @@
         </div>
     </div>
 
-    <!-- ROW 3: Reviews + Order Mini Chart -->
+    <!-- ROW 3: Reviews + Statistik 1 Bulan -->
     <div class="grid-row row2">
 
         <!-- Reviews -->
         <div class="card">
             <div class="card-header" style="margin-bottom:16px;">
                 <div class="card-label" style="font-size:14px;font-weight:700;color:var(--text);">Review Customer</div>
+                <a href="#" class="btn-outline" onclick="openPanel('panelRating');return false;">View All</a>
             </div>
             <div style="overflow-x:auto;">
                 <table>
@@ -590,65 +700,307 @@
             </div>
         </div>
 
-        <!-- Orders Mini Chart -->
-        <div class="order-chart-card">
-            <div class="card-header">
+        <!-- Statistik 1 Bulan -->
+        <div class="card">
+            <div class="card-header" style="margin-bottom:12px;">
                 <div>
-                    <div class="card-label">Order</div>
-                    <div class="card-value medium">{{ number_format($totalOrdersThisWeek) }}</div>
-                    @if($ordersChangePercent >= 0)
-                        <span class="badge-up"><i class="fas fa-arrow-up"></i> {{ $ordersChangePercent }}% vs last week</span>
-                    @else
-                        <span class="badge-down"><i class="fas fa-arrow-down"></i> {{ abs($ordersChangePercent) }}% vs last week</span>
-                    @endif
-                    <div style="font-size:11px;color:var(--muted);margin-top:4px;">Sales 1–6 {{ now()->format('M, Y') }}</div>
+                    <div class="card-label" style="font-size:14px;font-weight:700;color:var(--text);">Statistik 1 Bulan</div>
+                    <div style="font-size:11px;color:var(--muted);margin-top:2px;">Revenue &amp; Orders — {{ now()->subDays(29)->format('d M') }} – {{ now()->format('d M Y') }}</div>
                 </div>
-                <a href="#" class="btn-outline">View Report</a>
+                <a href="#" class="btn-outline" onclick="openPanel('panelStatistics');return false;">View All</a>
             </div>
-            <div class="chart-wrap">
-                <canvas id="orderChart"></canvas>
-            </div>
-            <div style="display:flex;gap:20px;margin-top:10px;">
-                <span style="font-size:11px;font-weight:600;color:var(--accent);"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--accent);margin-right:4px;"></span>This week</span>
-                <span style="font-size:11px;font-weight:600;color:#94a3b8;"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#cbd5e1;margin-right:4px;"></span>Last week</span>
+            <div class="chart-wrap-lg">
+                <canvas id="monthlyChart"></canvas>
             </div>
         </div>
     </div>
 
-    <!-- ROW 4: Monthly Statistics -->
-    <div class="card">
-        <div class="card-header" style="margin-bottom:8px;">
-            <div>
-                <div class="card-label" style="font-size:14px;font-weight:700;color:var(--text);">Statistik Bisnis 1 Bulan</div>
-                <div style="font-size:11px;color:var(--muted);margin-top:2px;">Revenue & Orders per hari — {{ now()->subDays(29)->format('d M') }} – {{ now()->format('d M Y') }}</div>
-            </div>
-        </div>
-        <div class="chart-wrap-lg">
-            <canvas id="monthlyChart"></canvas>
-        </div>
-    </div>
+
 
 </main>
 
-<!-- ══ MODAL ACTIVE DEVICES ══════════════════════════════════ -->
-<div class="modal-overlay" id="activeModal" onclick="closeModalOutside(event)">
-    <div class="modal-box">
-        <div class="modal-head">
-            <h2>
-                <span class="an-pulse"></span>
-                Active Devices
-            </h2>
-            <button class="modal-close" onclick="closeActiveModal()" aria-label="Tutup"><i class="fas fa-times"></i></button>
+{{-- ══ PANEL: PAYMENT HISTORY ════════════════════════════════ --}}
+<div class="panel-overlay" id="panelPayment">
+    <div class="panel-backdrop" onclick="closePanel('panelPayment')"></div>
+    <div class="panel-sheet">
+        <div class="panel-head">
+            <div class="panel-head-left">
+                <div class="panel-head-icon" style="background:linear-gradient(135deg,#3b4b86,#5b6fb5);"><i class="fas fa-history"></i></div>
+                <div>
+                    <h2>Payment History</h2>
+                    <div class="panel-head-sub">Seluruh riwayat transaksi customer</div>
+                </div>
+            </div>
+            <button class="panel-close" onclick="closePanel('panelPayment')"><i class="fas fa-times"></i></button>
         </div>
-        <div class="modal-body" id="modalDeviceList">
-            <!-- diisi oleh JS -->
-        </div>
-        <div class="modal-footer">
-            <i class="fas fa-sync-alt"></i>
-            <span id="lastRefreshTime">Memuat…</span>
+        <div class="panel-body">
+            {{-- Summary Stats --}}
+            <div class="panel-summary">
+                <div class="panel-stat">
+                    <div class="ps-val">{{ number_format($totalCustomers) }}</div>
+                    <div class="ps-lbl">Total Customer</div>
+                </div>
+                <div class="panel-stat">
+                    <div class="ps-val" style="color:var(--green);">{{ $transactions->where('payment_status','success')->count() }}</div>
+                    <div class="ps-lbl">Berhasil</div>
+                </div>
+                <div class="panel-stat">
+                    <div class="ps-val" style="color:var(--gold);">{{ $transactions->where('payment_status','pending')->count() }}</div>
+                    <div class="ps-lbl">Pending</div>
+                </div>
+                <div class="panel-stat">
+                    <div class="ps-val" style="color:var(--red);">{{ $transactions->where('payment_status','failed')->count() }}</div>
+                    <div class="ps-lbl">Gagal</div>
+                </div>
+            </div>
+            {{-- Filter Chips --}}
+            <div class="panel-filter-bar">
+                <span style="font-size:12px;font-weight:600;color:var(--muted);">Filter:</span>
+                <button class="filter-chip active" onclick="filterTable('payTbl','all',this)">Semua</button>
+                <button class="filter-chip" onclick="filterTable('payTbl','success',this)">Berhasil</button>
+                <button class="filter-chip" onclick="filterTable('payTbl','pending',this)">Pending</button>
+                <button class="filter-chip" onclick="filterTable('payTbl','failed',this)">Gagal</button>
+            </div>
+            {{-- Full Table --}}
+            <div style="overflow-x:auto;">
+                <table class="panel-table" id="payTbl">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Nama</th>
+                            <th>Nomor HP</th>
+                            <th>Email</th>
+                            <th>Jam Transaksi</th>
+                            <th>Tanggal</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($transactions as $i => $trx)
+                        <tr data-status="{{ $trx->payment_status }}">
+                            <td style="color:var(--muted);font-weight:600;">{{ $i+1 }}</td>
+                            <td style="font-weight:700;">{{ $trx->customer_name ?? '-' }}</td>
+                            <td>{{ $trx->phone_number ?? '-' }}</td>
+                            <td>{{ $trx->email ?? '-' }}</td>
+                            <td>{{ $trx->created_at->format('H:i:s') }}</td>
+                            <td>{{ $trx->created_at->format('d/m/Y') }}</td>
+                            <td>
+                                @if($trx->payment_status === 'success')
+                                    <span class="status-badge success">Berhasil</span>
+                                @elseif($trx->payment_status === 'failed')
+                                    <span class="status-badge failed">Gagal</span>
+                                @else
+                                    <span class="status-badge pending">Pending</span>
+                                @endif
+                            </td>
+                        </tr>
+                        @empty
+                        <tr><td colspan="7" class="panel-empty"><i class="fas fa-inbox"></i>Belum ada transaksi</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
+
+{{-- ══ PANEL: REVENUE ═════════════════════════════════════════ --}}
+<div class="panel-overlay" id="panelRevenue">
+    <div class="panel-backdrop" onclick="closePanel('panelRevenue')"></div>
+    <div class="panel-sheet">
+        <div class="panel-head">
+            <div class="panel-head-left">
+                <div class="panel-head-icon" style="background:linear-gradient(135deg,#16a34a,#22c55e);"><i class="fas fa-dollar-sign"></i></div>
+                <div>
+                    <h2>Revenue</h2>
+                    <div class="panel-head-sub">Laporan pendapatan lengkap — {{ now()->startOfWeek()->format('d M') }} s/d {{ now()->format('d M Y') }}</div>
+                </div>
+            </div>
+            <button class="panel-close" onclick="closePanel('panelRevenue')"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="panel-body">
+            <div class="panel-summary">
+                <div class="panel-stat">
+                    <div class="ps-val" style="font-size:22px;">IDR {{ number_format($revenueThisWeek,0,',','.') }}</div>
+                    <div class="ps-lbl">Revenue Minggu Ini</div>
+                    @if($revenueChangePercent >= 0)
+                        <div class="ps-badge" style="color:var(--green);"><i class="fas fa-arrow-up"></i> {{ $revenueChangePercent }}% vs lalu</div>
+                    @else
+                        <div class="ps-badge" style="color:var(--red);"><i class="fas fa-arrow-down"></i> {{ abs($revenueChangePercent) }}% vs lalu</div>
+                    @endif
+                </div>
+                <div class="panel-stat">
+                    <div class="ps-val">{{ number_format($totalOrdersThisWeek) }}</div>
+                    <div class="ps-lbl">Order Minggu Ini</div>
+                    @if($ordersChangePercent >= 0)
+                        <div class="ps-badge" style="color:var(--green);"><i class="fas fa-arrow-up"></i> {{ $ordersChangePercent }}%</div>
+                    @else
+                        <div class="ps-badge" style="color:var(--red);"><i class="fas fa-arrow-down"></i> {{ abs($ordersChangePercent) }}%</div>
+                    @endif
+                </div>
+                <div class="panel-stat">
+                    <div class="ps-val">{{ number_format($totalPhotosToday) }}</div>
+                    <div class="ps-lbl">Foto Hari Ini</div>
+                </div>
+            </div>
+            <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;">Grafik Revenue & Order (30 Hari)</div>
+            <div class="panel-chart-wrap">
+                <canvas id="panelRevenueChart"></canvas>
+            </div>
+            <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;">Revenue per Hari (Minggu Ini)</div>
+            <div style="overflow-x:auto;">
+                <table class="panel-table">
+                    <thead>
+                        <tr><th>Hari</th><th style="text-align:right;">Revenue (IDR)</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach($revenueChart as $rc)
+                        <tr>
+                            <td>{{ $rc['label'] }}</td>
+                            <td style="text-align:right;font-weight:700;">{{ number_format($rc['value'],0,',','.') }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- ══ PANEL: RATING / REVIEW ══════════════════════════════════ --}}
+<div class="panel-overlay" id="panelRating">
+    <div class="panel-backdrop" onclick="closePanel('panelRating')"></div>
+    <div class="panel-sheet">
+        <div class="panel-head">
+            <div class="panel-head-left">
+                <div class="panel-head-icon" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);"><i class="fas fa-star"></i></div>
+                <div>
+                    <h2>Rating & Review Customer</h2>
+                    <div class="panel-head-sub">Seluruh ulasan yang diberikan customer</div>
+                </div>
+            </div>
+            <button class="panel-close" onclick="closePanel('panelRating')"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="panel-body">
+            <div class="panel-summary">
+                <div class="panel-stat">
+                    <div class="ps-val">{{ $reviews->count() }}</div>
+                    <div class="ps-lbl">Total Review</div>
+                </div>
+                <div class="panel-stat">
+                    <div class="ps-val" style="color:var(--gold);">{{ $reviews->count() > 0 ? number_format($reviews->avg('rating'),1) : '-' }}</div>
+                    <div class="ps-lbl">Rata-rata Rating</div>
+                </div>
+                <div class="panel-stat">
+                    <div class="ps-val" style="color:var(--green);">{{ $reviews->where('rating',5)->count() }}</div>
+                    <div class="ps-lbl">Bintang 5 ⭐</div>
+                </div>
+                <div class="panel-stat">
+                    <div class="ps-val" style="color:var(--red);">{{ $reviews->where('rating','<=',2)->count() }}</div>
+                    <div class="ps-lbl">Rating Rendah</div>
+                </div>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="panel-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Nama</th>
+                            <th>Email</th>
+                            <th>Rating</th>
+                            <th>Tanggal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($reviews as $i => $review)
+                        <tr>
+                            <td style="color:var(--muted);font-weight:600;">{{ $i+1 }}</td>
+                            <td style="font-weight:700;">{{ $review->customer_name }}</td>
+                            <td>{{ $review->email ?? '-' }}</td>
+                            <td>
+                                <span class="stars">
+                                    @for($s = 1; $s <= 5; $s++)
+                                        @if($s <= $review->rating) ★ @else <span class="empty">★</span> @endif
+                                    @endfor
+                                </span>
+                                <span style="font-size:11px;color:var(--muted);margin-left:4px;">({{ $review->rating }}/5)</span>
+                            </td>
+                            <td>{{ $review->created_at->format('d M Y') }}</td>
+                        </tr>
+                        @empty
+                        <tr><td colspan="5"><div class="panel-empty"><i class="fas fa-star"></i>Belum ada review</div></td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- ══ PANEL: STATISTICS ═══════════════════════════════════════ --}}
+<div class="panel-overlay" id="panelStatistics">
+    <div class="panel-backdrop" onclick="closePanel('panelStatistics')"></div>
+    <div class="panel-sheet">
+        <div class="panel-head">
+            <div class="panel-head-left">
+                <div class="panel-head-icon" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);"><i class="fas fa-chart-bar"></i></div>
+                <div>
+                    <h2>Statistik & Order</h2>
+                    <div class="panel-head-sub">Data lengkap 30 hari terakhir — {{ now()->subDays(29)->format('d M') }} s/d {{ now()->format('d M Y') }}</div>
+                </div>
+            </div>
+            <button class="panel-close" onclick="closePanel('panelStatistics')"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="panel-body">
+            <div class="panel-summary">
+                <div class="panel-stat">
+                    <div class="ps-val">{{ number_format($totalOrdersThisWeek) }}</div>
+                    <div class="ps-lbl">Order Minggu Ini</div>
+                    @if($ordersChangePercent >= 0)
+                        <div class="ps-badge" style="color:var(--green);"><i class="fas fa-arrow-up"></i> {{ $ordersChangePercent }}%</div>
+                    @else
+                        <div class="ps-badge" style="color:var(--red);"><i class="fas fa-arrow-down"></i> {{ abs($ordersChangePercent) }}%</div>
+                    @endif
+                </div>
+                <div class="panel-stat">
+                    <div class="ps-val">{{ number_format($totalCustomers) }}</div>
+                    <div class="ps-lbl">Total Customer</div>
+                </div>
+                <div class="panel-stat">
+                    <div class="ps-val" style="font-size:20px;">IDR {{ number_format($revenueThisWeek,0,',','.') }}</div>
+                    <div class="ps-lbl">Revenue Minggu Ini</div>
+                </div>
+            </div>
+            <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;">Grafik Statistik 30 Hari Terakhir</div>
+            <div class="panel-chart-wrap">
+                <canvas id="panelStatChart"></canvas>
+            </div>
+            <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;margin-top:8px;">Detail Per Hari</div>
+            <div style="overflow-x:auto;">
+                <table class="panel-table">
+                    <thead>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th style="text-align:right;">Revenue (IDR)</th>
+                            <th style="text-align:right;">Orders</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($monthlyStats as $stat)
+                        <tr>
+                            <td>{{ $stat['date'] }}</td>
+                            <td style="text-align:right;font-weight:700;">{{ number_format($stat['revenue'],0,',','.') }}</td>
+                            <td style="text-align:right;font-weight:700;">{{ $stat['orders'] }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 <script>
 // ── Data from PHP ──────────────────────────────────────────
@@ -693,47 +1045,6 @@ new Chart(revCtx, {
     }
 });
 
-// ── Order Mini Chart ───────────────────────────────────────
-const ordCtx = document.getElementById('orderChart').getContext('2d');
-const last7 = monthlyData.slice(-7);
-new Chart(ordCtx, {
-    type: 'line',
-    data: {
-        labels: last7.map(d => d.date),
-        datasets: [
-            {
-                label: 'Orders',
-                data: last7.map(d => d.orders),
-                borderColor: '#3b4b86',
-                backgroundColor: 'rgba(59,75,134,0.08)',
-                fill: true,
-                tension: 0.45,
-                borderWidth: 2.5,
-                pointRadius: 3,
-            },
-            {
-                label: 'Prev',
-                data: last7.map(d => Math.max(0, d.orders - Math.floor(Math.random() * 3))),
-                borderColor: '#cbd5e1',
-                backgroundColor: 'transparent',
-                fill: false,
-                tension: 0.45,
-                borderWidth: 2,
-                pointRadius: 2,
-                borderDash: [4,4],
-            }
-        ]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-            x: { grid: { display: false }, ticks: { font: { size: 10 } } },
-            y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 }, stepSize: 1 } }
-        }
-    }
-});
 
 // ── Monthly Statistics Chart ───────────────────────────────
 const mCtx = document.getElementById('monthlyChart').getContext('2d');
@@ -802,78 +1113,86 @@ new Chart(mCtx, {
 </script>
 
 <script>
-// ── Active Now Modal & Live Polling ────────────────────────
-const ACTIVE_URL = '{{ route("dashboard.active-devices") }}';
-let pollInterval = null;
-
-const statusIcon = { printing:'fa-print', pending:'fa-hourglass-half', completed:'fa-check-circle', failed:'fa-times-circle' };
-
-function renderDevices(data) {
-    const list  = document.getElementById('modalDeviceList');
-    const count = document.getElementById('activeNowCount');
-    const time  = document.getElementById('lastRefreshTime');
-
-    count.textContent = data.count;
-    time.textContent  = 'Diperbarui: ' + new Date().toLocaleTimeString('id-ID');
-
-    if (!data.devices.length) {
-        list.innerHTML = `
-            <div class="no-device">
-                <i class="fas fa-laptop-house"></i>
-                Tidak ada device yang aktif saat ini.
-            </div>`;
-        return;
-    }
-
-    list.innerHTML = data.devices.map(d => {
-        const icon   = statusIcon[d.status_cetak] || 'fa-desktop';
-        const cls    = d.status_cetak || 'pending';
-        const label  = { printing:'Printing', pending:'Pending', completed:'Selesai', failed:'Gagal' }[d.status_cetak] ?? d.status_cetak;
-        return `
-        <div class="device-card">
-            <div class="device-icon"><i class="fas fa-desktop"></i></div>
-            <div class="device-info">
-                <div class="device-name">${d.device_name}</div>
-                <div class="device-meta">
-                    Order: <strong>${d.order_id}</strong> &nbsp;·&nbsp;
-                    ${d.email} &nbsp;·&nbsp;
-                    Mulai: ${d.waktu_mulai ?? '-'} &nbsp;·&nbsp;
-                    Ping: ${d.last_ping_at ?? '-'}
-                </div>
-            </div>
-            <span class="device-status ${cls}">
-                <i class="fas ${icon}"></i> ${label}
-            </span>
-        </div>`;
-    }).join('');
-}
-
-function fetchActiveDevices() {
-    fetch(ACTIVE_URL, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-        .then(r => r.json())
-        .then(renderDevices)
-        .catch(() => {
-            document.getElementById('lastRefreshTime').textContent = 'Gagal memuat data';
+// ── Panel open / close ─────────────────────────────────────
+function openPanel(id) {
+    document.getElementById(id).classList.add('open');
+    document.body.style.overflow = 'hidden';
+    // Init charts lazily when panel opens
+    if (id === 'panelRevenue' && !window._revPanelInited) {
+        window._revPanelInited = true;
+        new Chart(document.getElementById('panelRevenueChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: monthlyData.map(d => d.date),
+                datasets: [
+                    { label: 'Revenue (IDR)', data: monthlyData.map(d => d.revenue), borderColor: '#16a34a', backgroundColor: 'rgba(22,163,74,0.1)', fill: true, tension: 0.4, borderWidth: 2.5, pointRadius: 2, yAxisID: 'yRev' },
+                    { label: 'Orders', data: monthlyData.map(d => d.orders), borderColor: '#3b4b86', backgroundColor: 'rgba(59,75,134,0.07)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 2, yAxisID: 'yOrd' }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: { legend: { display: true, position: 'top', labels: { usePointStyle: true, font: { size: 12 } } } },
+                scales: {
+                    x: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 }, maxTicksLimit: 15 } },
+                    yRev: { position: 'left', grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 }, callback: v => 'IDR ' + (v/1000).toFixed(0) + 'k' } },
+                    yOrd: { position: 'right', grid: { drawOnChartArea: false }, ticks: { font: { size: 10 }, stepSize: 1 } }
+                }
+            }
         });
+    }
+    if (id === 'panelStatistics' && !window._statPanelInited) {
+        window._statPanelInited = true;
+        new Chart(document.getElementById('panelStatChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: monthlyData.map(d => d.date),
+                datasets: [
+                    { label: 'Revenue (IDR)', data: monthlyData.map(d => d.revenue), backgroundColor: 'rgba(99,102,241,0.75)', borderRadius: 5, yAxisID: 'yRev' },
+                    { label: 'Orders', data: monthlyData.map(d => d.orders), backgroundColor: 'rgba(34,197,94,0.75)', borderRadius: 5, yAxisID: 'yOrd' }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: { legend: { display: true, position: 'top', labels: { usePointStyle: true, font: { size: 12 } } } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { font: { size: 10 }, maxTicksLimit: 15 } },
+                    yRev: { position: 'left', grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 }, callback: v => 'IDR ' + (v/1000).toFixed(0) + 'k' } },
+                    yOrd: { position: 'right', grid: { drawOnChartArea: false }, ticks: { font: { size: 10 }, stepSize: 1 } }
+                }
+            }
+        });
+    }
 }
 
-function openActiveModal() {
-    document.getElementById('activeModal').classList.add('open');
-    fetchActiveDevices();
-    pollInterval = setInterval(fetchActiveDevices, 30000);
+function closePanel(id) {
+    document.getElementById(id).classList.remove('open');
+    document.body.style.overflow = '';
 }
 
-function closeActiveModal() {
-    document.getElementById('activeModal').classList.remove('open');
-    clearInterval(pollInterval);
-}
+// Close all panels on Escape
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        ['panelPayment','panelRevenue','panelRating','panelStatistics'].forEach(closePanel);
+    }
+});
 
-function closeModalOutside(e) {
-    if (e.target === document.getElementById('activeModal')) closeActiveModal();
+// Filter table rows by payment status
+function filterTable(tableId, status, chip) {
+    // toggle active chip
+    chip.closest('.panel-filter-bar').querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    // filter rows
+    document.getElementById(tableId).querySelectorAll('tbody tr').forEach(row => {
+        if (status === 'all' || row.dataset.status === status) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
 }
-
-// Close on Escape key
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeActiveModal(); });
 </script>
+
 </body>
 </html>
