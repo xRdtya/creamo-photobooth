@@ -106,8 +106,6 @@ class PhotoSessionController extends Controller
 
         $filePath = 'photos/' . $orderId . '/' . $fileName;
 
-        Storage::disk('s3')->put($filePath, $imageData, 'public');
-
         $transaction->email = $request->email;
         $transaction->save();
 

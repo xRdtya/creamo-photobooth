@@ -71,6 +71,8 @@
     <script>
         const frames = @json($frames);
         let currentIndex = 0;
+        const { createClient } = supabase; 
+        const supabaseClient = createClient('https://ywrswuyjuvgrnfmugxwm.supabase.co', '1dc2d4b6284276b84d214d0a34963e9f');
 
         const displayFrame = document.getElementById('displayFrame');
         const selectedFrameIdInput = document.getElementById('selectedFrameId');
@@ -111,9 +113,30 @@
 
             if (hasilGabungan) {
                 document.getElementById('input-hidden-final-photo').value = hasilGabungan;
-                document.getElementById('form-submit').submit();
+                await uploadKeSupabase(hasilGabungan, '{{ $orderId }}');
             }
         });
+
+        async function uploadKeSupabase(base64Data, orderId) {
+            const byteString = atob(base64Data.split(',')); 
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+            const blob = new Blob([ia], { type: 'image/jpeg' }); // Pake ia (Uint8Array)
+
+            const { data, error } = await supabaseClient
+                .storage
+                .from('photos')
+                .upload(`${orderId}/final_${Date.now()}.jpg`, blob);
+
+            if (error) {
+                console.error("Gagal upload:", error);
+                alert("Gagal upload ke Supabase!");
+            } else {
+                alert("Upload sukses langsung dari browser!");
+                window.location.href = "/halaman-sukses";
+            }
+        }
 
         function loadImage(src) {
             return new Promise((resolve, reject) => {
