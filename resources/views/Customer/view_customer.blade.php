@@ -17,7 +17,7 @@
             <p class="text-gray-500 text-xs md:text-sm mb-6">Order ID: #{{ $orderId }}</p>
 
             <div class="mb-6 border-4 border-white rounded-2xl overflow-hidden shadow-lg max-w-[200px] md:max-w-[220px] w-full transition-transform hover:scale-105 duration-300">
-                <img src="{{ asset('storage/' . $session->kode_download) }}" alt="Hasil Foto Photobooth" class="w-full h-auto block">
+                <img src="https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/{{ $session->kode_download }}" alt="Hasil Foto Photobooth" class="w-full h-auto block">
             </div>
 
             <div class="w-full max-w-[280px] mb-3">

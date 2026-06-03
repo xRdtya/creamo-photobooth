@@ -42,13 +42,11 @@ class PhotoSessionController extends Controller
             $folderPath = "photos/" . $orderId;
 
             foreach ($photos as $index => $base64Data) {
-                // FIX: Pakai REGEX biar semua format header (png, jpeg, jpg) otomatis terhapus dengan bersih!
                 $img = preg_replace('#^data:image/\w+;base64,#i', '', $base64Data);
                 $img = str_replace(' ', '+', $img);
 
                 $data = base64_decode($img);
 
-                // Validasi tambahan: Cek apakah hasil decode menghasilkan data kosong
                 if ($data === false) {
                     return response()->json(['success' => false, 'message' => 'Gagal membaca data foto ke-' . ($index + 1)], 500);
                 }
@@ -56,7 +54,6 @@ class PhotoSessionController extends Controller
                 $fileName = "photo_" . ($index + 1) . "_" . time() . ".png";
                 $fullPath = $folderPath . "/" . $fileName;
 
-                // Upload ke Supabase S3
                 Storage::disk('s3')->put($fullPath, $data);
 
                 $savedPaths[] = $fullPath;
@@ -87,145 +84,46 @@ class PhotoSessionController extends Controller
 
     public function saveFrame(Request $request, $orderId)
     {
-        $request->validate([
-            'selected_frame' => 'required',
-            'email'          => 'required|email',
-        ]);
+        $transaction = Transaction::where('order_id', $orderId)->firstOrFail();
+        $session = PhotoSession::where('transaction_id', $transaction->id)->firstOrFail();
 
-        try {
-            $transaction = Transaction::where('order_id', $orderId)->firstOrFail();
-            $session = PhotoSession::where('transaction_id', $transaction->id)->firstOrFail();
+        $base64Image = $request->input('final_photo');
 
-            $frameName = $request->selected_frame;
-            $framePath = public_path('/assets/img/frames/' . $frameName . '.png');
+        if (preg_match('/^data:image\/(\w+);base64,/', $base64Image, $type)) {
+            $base64Image = substr($base64Image, strpos($base64Image, ',') + 1);
 
-            if (!file_exists($framePath)) {
-                return redirect('/photo')->withErrors(['error' => 'File frame tidak ditemukan']);
+            $extension = strtolower($type[1]);
+
+            $imageData = base64_decode($base64Image);
+
+            if ($imageData === false) {
+                return redirect()->back()->with('error', 'Gagal memproses data gambar.');
             }
-
-            $frameImg = \imagecreatefrompng($framePath);
-            $frameWidth = imagesx($frameImg);
-            $frameHeight = imagesy($frameImg);
-
-            $canvas = imagecreatetruecolor($frameWidth, $frameHeight);
-            $white = imagecolorallocate($canvas, 255, 255, 255);
-            imagefill($canvas, 0, 0, $white);
-
-            imagealphablending($canvas, true);
-            imagesavealpha($canvas, true);
-
-            $widthPercent  = 0.80;
-            $heightPercent = 0.175;
-
-            $topPercentages = [0.08, 0.267, 0.455, 0.64];
-
-            $photoWidth  = (int)($frameWidth * $widthPercent);
-            $photoHeight = (int)($frameHeight * $heightPercent);
-            $xOffset     = (int)(($frameWidth - $photoWidth) / 2);
-
-            $yOffsets = [];
-            foreach ($topPercentages as $pct) {
-                $yOffsets[] = (int)($frameHeight * $pct);
-            }
-
-            $userPhotos = explode(',', $session->link_file_foto);
-
-            foreach ($userPhotos as $index => $photoPath) {
-                if (isset($yOffsets[$index]) && !empty(trim($photoPath))) {
-
-                    $cleanedPath = trim(str_replace(['public/', 'storage/'], '', $photoPath));
-                    $fullPath = Storage::disk('public')->path($cleanedPath);
-
-                    if (!file_exists($fullPath)) {
-                        return redirect('/photo')->withErrors([
-                            'error' => 'Foto ke-' . ($index + 1) . ' tidak ada di: ' . $fullPath
-                        ]);
-                    }
-
-                    $info = getimagesize($fullPath);
-                    $srcImg = null;
-
-                    if ($info['mime'] == 'image/jpeg' || $info['mime'] == 'image/jpg') {
-                        $srcImg = imagecreatefromjpeg($fullPath);
-                    } elseif ($info['mime'] == 'image/png') {
-                        $srcImg = \imagecreatefrompng($fullPath);
-                    }
-
-                    if ($srcImg) {
-                        $srcW = imagesx($srcImg);
-                        $srcH = imagesy($srcImg);
-
-                        $srcRatio = $srcW / $srcH;
-                        $dstRatio = $photoWidth / $photoHeight;
-
-                        if ($srcRatio > $dstRatio) {
-                            $cropH = $srcH;
-                            $cropW = (int)($srcH * $dstRatio);
-                            $srcX = (int)(($srcW - $cropW) / 2);
-                            $srcY = 0;
-                        } else {
-                            $cropW = $srcW;
-                            $cropH = (int)($srcW / $dstRatio);
-                            $srcX = 0;
-                            $srcY = (int)(($srcH - $cropH) / 2);
-                        }
-
-                        imagecopyresampled(
-                            $canvas,
-                            $srcImg,
-                            $xOffset,
-                            $yOffsets[$index],
-                            $srcX,
-                            $srcY,
-                            $photoWidth,
-                            $photoHeight,
-                            $cropW,
-                            $cropH
-                        );
-                        imagedestroy($srcImg);
-                    }
-                }
-            }
-
-            imagecopy($canvas, $frameImg, 0, 0, 0, 0, $frameWidth, $frameHeight);
-            imagedestroy($frameImg);
-
-            ob_start();
-            imagepng($canvas);
-            $encodedImage = ob_get_clean();
-            imagedestroy($canvas);
-
-            $finalFileName = 'final_' . time() . '.png';
-            $finalFolder = 'photos/' . $orderId;
-            $finalFullPath = $finalFolder . '/' . $finalFileName;
-
-            if (!Storage::disk('public')->exists($finalFolder)) {
-                Storage::disk('public')->makeDirectory($finalFolder);
-            }
-
-            Storage::disk('public')->put($finalFullPath, $encodedImage);
-
-
-            $transaction->email = $request->email;
-            $transaction->save();
-
-            // $session->email = $request->email;
-            $session->kode_download = $finalFullPath;
-            $session->save();
-
-            $downloadLink = route('photo.view', $orderId);
-
-            $customerEmail = $request->email;
-            Mail::send('email.photo_link', ['downloadLink' => $downloadLink], function ($message) use ($customerEmail) {
-                $message->to($customerEmail)
-                    ->subject('Hasil Foto Photobooth Kamu Sudah Jadi! 📸');
-            });
-
-            return redirect()->route('photo')->with('success', 'Foto berhasil digabungkan!');
-        } catch (\Exception $e) {
-            dd($e);
-            return redirect('/photo')->withErrors(['error' => 'Gagal menggabungkan: ' . $e->getMessage()]);
+        } else {
+            return redirect()->back()->with('error', 'Data gambar tidak ditemukan.');
         }
+        $fileName = "final_" . $orderId . "_" . time() . '.' . $extension;
+
+        $filePath = 'photos/' . $orderId . '/' . $fileName;
+
+        Storage::disk('s3')->put($filePath, $imageData, 'public');
+
+        $transaction->email = $request->email;
+        $transaction->save();
+
+        // $session->email = $request->email;
+        $session->kode_download = $filePath;
+        $session->save();
+
+        $downloadLink = route('photo.view', $orderId);
+
+        $customerEmail = $request->email;
+        Mail::send('email.photo_link', ['downloadLink' => $downloadLink], function ($message) use ($customerEmail) {
+            $message->to($customerEmail)
+                ->subject('Hasil Foto Photobooth Kamu Sudah Jadi! 📸');
+        });
+
+        return redirect()->route('photo')->with('success', 'Foto berhasil digabungkan!');
     }
 
     public function viewPhoto($orderId)
