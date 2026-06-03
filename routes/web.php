@@ -43,7 +43,7 @@ Route::middleware('auth:merchant')->group(function () {
 
 Route::get('/photo', function() {
     return view("Customer.frontPage");
-});
+})->name('photo');
 
 Route::post('/photo/payment', [TransactionController::class, 'createQris']);
 Route::post('/photo/webhook', [TransactionController::class, 'notificationHandler']);
@@ -67,7 +67,8 @@ Route::post('/photo/upload', [PhotoSessionController::class, 'upload']);
 
 Route::post('/photo/select-frame/{Order_id}', [PhotoSessionController::class, 'index']);
 Route::post('/photo/save-frame/{Order_id}', [PhotoSessionController::class, 'saveFrame'])->name('photo.save-frame');
-Route::get('/photo/success/{Order_id}', [PhotoSessionController::class, 'success'])->name('photo.success');
+Route::get('/photo/view/{Order_id}', [PhotoSessionController::class, 'viewPhoto'])->name('photo.view');
+Route::get('/photo/download/{Order_id}', [PhotoSessionController::class, 'downloadPhoto'])->name('photo.download');
 
 // ── Device Heartbeat (dipanggil oleh device photobooth) ──────────────────────
 Route::post('/photo/device/ping',     [DevicePingController::class, 'ping']);

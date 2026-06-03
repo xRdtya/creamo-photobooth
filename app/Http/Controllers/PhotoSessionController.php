@@ -6,6 +6,7 @@ use App\Models\PhotoSession;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class PhotoSessionController extends Controller
@@ -100,44 +101,33 @@ class PhotoSessionController extends Controller
                 return redirect('/photo')->withErrors(['error' => 'File frame tidak ditemukan']);
             }
 
-            // 1. Ambil info ukuran asli dari file Frame yang diupload
             $frameImg = imagecreatefrompng($framePath);
             $frameWidth = imagesx($frameImg);
             $frameHeight = imagesy($frameImg);
 
-            // 2. Buat Canvas kosong warna putih murni sesuai ukuran frame
             $canvas = imagecreatetruecolor($frameWidth, $frameHeight);
             $white = imagecolorallocate($canvas, 255, 255, 255);
             imagefill($canvas, 0, 0, $white);
 
-            // Aktifkan mode transparansi agar PNG frame tidak rusak
             imagealphablending($canvas, true);
             imagesavealpha($canvas, true);
 
-            // =========================================================================
-            // 🔥 CONFIGURASI DIKOPEL LANGSUNG DARI TAILWIND PREVIEW LU
-            // =========================================================================
-            $widthPercent  = 0.80;   // Dari w-[80%]
-            $heightPercent = 0.175;  // Estimasi tinggi tiap kotak (17.5% dari total tinggi frame)
-            // *Silakan ubah angka 0.175 ini jika fotonya kurang tinggi/pendek
+            $widthPercent  = 0.80;
+            $heightPercent = 0.175;
 
-            // Dari top-[8%], top-[26.7%], top-[45.5%], top-[64%]
             $topPercentages = [0.08, 0.267, 0.455, 0.64];
 
-            // Konversi Persentase Tailwind menjadi Pixel Nyata (Dinamis)
             $photoWidth  = (int)($frameWidth * $widthPercent);
             $photoHeight = (int)($frameHeight * $heightPercent);
-            $xOffset     = (int)(($frameWidth - $photoWidth) / 2); // Efek dari left-1/2 -translate-x-1/2
+            $xOffset     = (int)(($frameWidth - $photoWidth) / 2);
 
             $yOffsets = [];
             foreach ($topPercentages as $pct) {
                 $yOffsets[] = (int)($frameHeight * $pct);
             }
-            // =========================================================================
 
             $userPhotos = explode(',', $session->link_file_foto);
 
-            // 3. Looping & Potong Tengah Foto User
             foreach ($userPhotos as $index => $photoPath) {
                 if (isset($yOffsets[$index]) && !empty(trim($photoPath))) {
 
@@ -163,7 +153,6 @@ class PhotoSessionController extends Controller
                         $srcW = imagesx($srcImg);
                         $srcH = imagesy($srcImg);
 
-                        // Rumus Crop Center (Cover) agar foto tidak gepeng
                         $srcRatio = $srcW / $srcH;
                         $dstRatio = $photoWidth / $photoHeight;
 
@@ -179,7 +168,6 @@ class PhotoSessionController extends Controller
                             $srcY = (int)(($srcH - $cropH) / 2);
                         }
 
-                        // Tempel foto user ke dalam Canvas di bawah frame
                         imagecopyresampled(
                             $canvas,
                             $srcImg,
@@ -197,17 +185,14 @@ class PhotoSessionController extends Controller
                 }
             }
 
-            // 4. Tempelkan Frame Transparan paling atas (Menumpuk foto)
             imagecopy($canvas, $frameImg, 0, 0, 0, 0, $frameWidth, $frameHeight);
             imagedestroy($frameImg);
 
-            // 5. Ubah menjadi data PNG
             ob_start();
             imagepng($canvas);
             $encodedImage = ob_get_clean();
             imagedestroy($canvas);
 
-            // 6. Simpan hasil akhir
             $finalFileName = 'final_' . time() . '.png';
             $finalFolder = 'photos/' . $orderId;
             $finalFullPath = $finalFolder . '/' . $finalFileName;
@@ -218,20 +203,56 @@ class PhotoSessionController extends Controller
 
             Storage::disk('public')->put($finalFullPath, $encodedImage);
 
-            $session->link_hasil_final = $finalFullPath;
+        
+            $transaction->email = $request->email;
+            $transaction->save();
+
+            // $session->email = $request->email;
+            $session->kode_download = $finalFullPath;
             $session->save();
 
-            return redirect()->route('photo.success', $orderId)->with('success', 'Foto berhasil digabungkan!');
+            $downloadLink = route('photo.view', $orderId);
+
+            $customerEmail = $request->email;
+            Mail::send('email.photo_link', ['downloadLink' => $downloadLink], function ($message) use ($customerEmail) {
+                $message->to($customerEmail)
+                    ->subject('Hasil Foto Photobooth Kamu Sudah Jadi! 📸');
+            });
+
+            return redirect()->route('photo')->with('success', 'Foto berhasil digabungkan!');
         } catch (\Exception $e) {
+            dd($e);
             return redirect('/photo')->withErrors(['error' => 'Gagal menggabungkan: ' . $e->getMessage()]);
         }
     }
 
-    public function success($orderId)
+    public function viewPhoto($orderId)
     {
-        $order   = Transaction::where('order_id', $orderId)->firstOrFail();
-        $session = PhotoSession::where('transaction_id', $order->id)->firstOrFail();
+        $transaction = Transaction::where('order_id', $orderId)->firstOrFail();
+        $session = PhotoSession::where('transaction_id', $transaction->id)->firstOrFail();
 
-        dd('MANTAP MANIA');
+        return view('Customer.view_customer', compact('session', 'orderId'));
+    }
+
+    public function downloadPhoto($orderId)
+    {
+        try {
+            $transaction = Transaction::where('order_id', $orderId)->firstOrFail();
+
+            $session = PhotoSession::where('transaction_id', $transaction->id)->firstOrFail();
+
+            $path = $session->kode_download;
+
+            if ($path && Storage::disk('public')->exists($path)) {
+
+                $customFileName = 'Creamo_' . $orderId . '.png';
+
+                return Storage::disk('public')->download($path, $customFileName);
+            }
+
+            return redirect()->back()->withErrors(['error' => 'File foto tidak ditemukan di server.']);
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Gagal mendownload: ' . $e->getMessage()]);
+        }
     }
 }

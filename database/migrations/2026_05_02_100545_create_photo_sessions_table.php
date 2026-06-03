@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('photo_sessions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('transaction_id')->constrained('transactions')->cascadeOnDelete();
-            $table->string('email');
-            $table->string('kode_download')->unique();
+            $table->string('email')->nullable();
+            $table->string('kode_download')->unique()->nullable();
             $table->string('link_file_foto')->nullable();
             $table->string('link_file_video')->nullable();
             $table->timestamp('waktu_mulai')->useCurrent();
