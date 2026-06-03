@@ -103,7 +103,7 @@ class PhotoSessionController extends Controller
                 return redirect('/photo')->withErrors(['error' => 'File frame tidak ditemukan']);
             }
 
-            $frameImg = imagecreatefrompng($framePath);
+            $frameImg = \imagecreatefrompng($framePath);
             $frameWidth = imagesx($frameImg);
             $frameHeight = imagesy($frameImg);
 
