@@ -25,16 +25,16 @@
                 <img id="displayFrame" src="{{ asset('assets/img/frames/' . $frames[0]['image']) }}" class="absolute inset-0 w-full h-full z-20 object-cover pointer-events-none">
                 <div class="absolute inset-0 z-10">
                     <div class="absolute left-1/2 -translate-x-1/2 top-[8%] w-[80%] overflow-hidden">
-                        <img src="https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/photos/{{ $photos[0] }}" class="w-full h-full object-cover">
+                        <img src="https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/{{ $photos[0] }}" class="w-full h-full object-cover">
                     </div>
                     <div class="absolute left-1/2 -translate-x-1/2 top-[26.7%] w-[80%] overflow-hidden">
-                        <img src="https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/photos/{{ $photos[1] }}" class="w-full h-full object-cover">
+                        <img src="https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/{{ $photos[1] }}" class="w-full h-full object-cover">
                     </div>
                     <div class="absolute left-1/2 -translate-x-1/2 top-[45.5%] w-[80%] overflow-hidden">
-                        <img src="https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/photos/{{ $photos[2] }}" class="w-full h-full object-cover">
+                        <img src="https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/{{ $photos[2] }}" class="w-full h-full object-cover">
                     </div>
                     <div class="absolute left-1/2 -translate-x-1/2 top-[64%] w-[80%] overflow-hidden">
-                        <img src="https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/photos/{{ $photos[3] }}" class="w-full h-full object-cover">
+                        <img src="https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/{{ $photos[3] }}" class="w-full h-full object-cover">
                     </div>
                 </div>
             </div>
