@@ -15,6 +15,7 @@
     <section style="background-image: url(/assets/img/bg2.png)" class="h-[80vh] m-auto w-11/12 rounded-[50px] shadow-2xl/50 bg-no-repeat bg-cover flex justify-center items-center">
         <form action="/photo/payment" method="POST">
             @csrf
+            <input type="hidden" name="merchant_id" value="{{ Auth::guard('merchant')->user()->id }}">
             <button id="pay-button" class="bg-secondary h-75 w-150 rounded-3xl shadow-2xl/50 flex flex-col items-center justify-center relative" type="submit">
                 <img class="w-100" src="/assets/img/logocreamo.png" alt="Logo">
                 <p class="font-montserrat text-queaternary font-medium text-xl absolute bottom-20">Create a moment</p>

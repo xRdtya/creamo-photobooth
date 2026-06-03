@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +10,7 @@
 </head>
     <body>
         <nav class="flex justify-center fixed w-full z-40">
-            <ul class="flex flex-row justify-around bg-tertiary/40 mt-5 w-11/12 h-24 shadow-2xl/40 bg-clip-padding backdrop-filter backdrop-blur-xs rounded-full border border-gray-300">
+            <ul class="flex flex-row justify-around @auth('merchant') items-center @endauth bg-tertiary/40 mt-5 w-11/12 h-24 shadow-2xl/40 bg-clip-padding backdrop-filter backdrop-blur-xs rounded-full border border-gray-300">
                 <li class="grid content-center">
                     <a href="#"><img class="w-56" src="assets/img/logocreamo.png" alt="Logo"></a>
                 </li>
@@ -20,9 +20,20 @@
                 <li class="grid content-center">
                     <a class="font-montserrat font-bold text-lg text-queaternary" href="#subs">Subscription</a>
                 </li>
+                @guest('merchant')
                 <li class="grid content-center my-4 w-32 bg-queaternary text-secondary rounded-full hover:bg-queaternary/80">
-                    <a class="text-center text-lg font-montserrat font-medium" href="#">Login</a>
+                    <a class="text-center text-lg font-montserrat font-medium" href="/signin">Login</a>
                 </li>
+                @endguest
+                @auth('merchant')
+                <li class="flex justify-center overflow-hidden w-12 h-12 rounded-full bg-queaternary border-0">
+                    <a href="/dashboard" class="flex border-0 p-0 m-0">
+                        <svg class="w-12 h-12 mt-2 -mb-2 text-secondary" fill="var(--color-secondary)" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                        </svg>
+                    </a>
+                </li>
+                @endauth
             </ul>
         </nav>
         <section style="background-image: url(/assets/img/bg.png)" class="h-screen bg-no-repeat bg-cover flex justify-center" id="homepage">
@@ -123,7 +134,7 @@
                         <p class="font-montserrat text-secondary font-light text-lg">Jalan Pelita Blok D No. 9, Banjarbaru <br>Kalimantan Selatan. Indonesia.</p>
                         <br>
                         <p class="font-montserrat text-secondary font-light text-lg">creamophotography@gmail.com</p>
-                        <p class="font-montserrat text-secondary font-light text-lg">085248713983</p>
+                        <p class="font-montserrat text-secondary font-light text-lg">0852-4871-3983</p>
                     </div>
                 </div>
                 <small class="font-montserrat text-primary font-extralight bottom-3 left-12 absolute">&copy; 2026 Creamo, All rights reserved.</small>

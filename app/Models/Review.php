@@ -4,16 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Transaction extends Model
+class Review extends Model
 {
-    protected $guarded = [
-        'id'
+    protected $fillable = [
+        'merchant_id',
+        'customer_name',
+        'email',
+        'rating',
+        'comment',
     ];
-
-    public function photoSessions()
-    {
-        return $this->hasMany(PhotoSession::class);
-    }
 
     public function merchant()
     {

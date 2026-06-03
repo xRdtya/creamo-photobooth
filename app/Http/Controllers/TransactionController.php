@@ -37,14 +37,15 @@ class TransactionController extends Controller
 
         $response = CoreApi::charge($params);
 
+        $qr_url = $response->actions[0]->url;
+
         Transaction::create([
             'order_id' => $orderId,
-            'merchant_id' => '1',
+            'merchant_id' => $request->merchant_id,
             'gross_amount' => $params['transaction_details']['gross_amount'],
-            'payment_status' => 'pending'
+            'payment_status' => 'pending',
+            'qris_reference' => $qr_url
         ]);
-
-        $qr_url = $response->actions[0]->url;
 
         return view('Customer.payment', compact('qr_url', 'orderId'));
     }
