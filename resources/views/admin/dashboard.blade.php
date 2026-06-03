@@ -617,8 +617,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Nama</th>
-                        <th>Nomor HP</th>
+                        <th>Order ID</th>
                         <th>Jam Transaksi</th>
                         <th>Tanggal Transaksi</th>
                         <th>Email</th>
@@ -628,8 +627,7 @@
                 <tbody>
                     @forelse($transactions as $trx)
                     <tr>
-                        <td style="font-weight:600;">{{ $trx->customer_name ?? '-' }}</td>
-                        <td>{{ $trx->phone_number ?? '-' }}</td>
+                        <td style="font-weight:600;">{{ $trx->order_id ?? '-' }}</td>
                         <td>{{ $trx->created_at->format('H:i:s') }}</td>
                         <td>{{ $trx->created_at->format('d/m/y') }}</td>
                         <td>{{ $trx->email ?? '-' }}</td>
@@ -645,7 +643,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" style="text-align:center;color:var(--muted);padding:30px;">Belum ada transaksi</td>
+                        <td colspan="5" style="text-align:center;color:var(--muted);padding:30px;">Belum ada transaksi</td>
                     </tr>
                     @endforelse
                 </tbody>
