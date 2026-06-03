@@ -125,10 +125,12 @@ class PhotoSessionController extends Controller
 
         unset($imageData);
         unset($base64Image);
-        echo "Upload sukses! Silahkan klik tombol back di browser.";
-        die();
 
-        return redirect()->route('photo')->with('success', 'Foto berhasil digabungkan!');
+        return response('
+            <script>
+                window.location.href = "/halaman-tujuan";
+            </script>
+        ');
     }
 
     public function viewPhoto($orderId)
