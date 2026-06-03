@@ -123,6 +123,9 @@ class PhotoSessionController extends Controller
                 ->subject('Hasil Foto Photobooth Kamu Sudah Jadi! 📸');
         });
 
+        unset($imageData);
+        unset($base64Image);
+
         return redirect()->route('photo')->with('success', 'Foto berhasil digabungkan!');
     }
 
