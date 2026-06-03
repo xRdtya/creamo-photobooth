@@ -103,7 +103,7 @@ class PhotoSessionController extends Controller
                 return redirect('/photo')->withErrors(['error' => 'File frame tidak ditemukan']);
             }
 
-            $frameImg = \imagecreatefrompng($framePath);
+            $frameImg = imagecreatefrompng($framePath);
             $frameWidth = imagesx($frameImg);
             $frameHeight = imagesy($frameImg);
 
@@ -133,23 +133,21 @@ class PhotoSessionController extends Controller
             foreach ($userPhotos as $index => $photoPath) {
                 if (isset($yOffsets[$index]) && !empty(trim($photoPath))) {
 
+                    // Bersihkan path agar sesuai dengan key yang ada di S3/Supabase
                     $cleanedPath = trim(str_replace(['public/', 'storage/'], '', $photoPath));
-                    $fullPath = Storage::disk('s3')->path($cleanedPath);
 
-                    if (!file_exists($fullPath)) {
+                    // FIX 1: Gunakan Storage Facade untuk mengecek file di remote S3, jangan pakai file_exists lokal!
+                    if (!Storage::disk('s3')->exists($cleanedPath)) {
                         return redirect('/photo')->withErrors([
-                            'error' => 'Foto ke-' . ($index + 1) . ' tidak ada di: ' . $fullPath
+                            'error' => 'Foto ke-' . ($index + 1) . ' tidak ditemukan di S3 Storage.'
                         ]);
                     }
 
-                    $info = getimagesize($fullPath);
-                    $srcImg = null;
+                    // FIX 2: Ambil data raw biner file dari S3
+                    $fileContent = Storage::disk('s3')->get($cleanedPath);
 
-                    if ($info['mime'] == 'image/jpeg' || $info['mime'] == 'image/jpg') {
-                        $srcImg = imagecreatefromjpeg($fullPath);
-                    } elseif ($info['mime'] == 'image/png') {
-                        $srcImg = imagecreatefrompng($fullPath);
-                    }
+                    // FIX 3: Load gambar menggunakan string biner (Otomatis mendeteksi PNG/JPG tanpa manual check)
+                    $srcImg = imagecreatefromstring($fileContent);
 
                     if ($srcImg) {
                         $srcW = imagesx($srcImg);
@@ -199,23 +197,18 @@ class PhotoSessionController extends Controller
             $finalFolder = 'photos/' . $orderId;
             $finalFullPath = $finalFolder . '/' . $finalFileName;
 
-            if (!Storage::disk('s3')->exists($finalFolder)) {
-                Storage::disk('s3')->makeDirectory($finalFolder);
-            }
-
+            // Upload hasil gabungan ke S3
             Storage::disk('s3')->put($finalFullPath, $encodedImage);
 
-        
             $transaction->email = $request->email;
             $transaction->save();
 
-            // $session->email = $request->email;
             $session->kode_download = $finalFullPath;
             $session->save();
 
             $downloadLink = route('photo.view', $orderId);
-
             $customerEmail = $request->email;
+            
             Mail::send('email.photo_link', ['downloadLink' => $downloadLink], function ($message) use ($customerEmail) {
                 $message->to($customerEmail)
                     ->subject('Hasil Foto Photobooth Kamu Sudah Jadi! 📸');
@@ -223,7 +216,6 @@ class PhotoSessionController extends Controller
 
             return redirect()->route('photo')->with('success', 'Foto berhasil digabungkan!');
         } catch (\Exception $e) {
-            dd($e);
             return redirect('/photo')->withErrors(['error' => 'Gagal menggabungkan: ' . $e->getMessage()]);
         }
     }
