@@ -25,16 +25,16 @@
                 <img id="displayFrame" src="{{ asset('assets/img/frames/' . $frames[0]['image']) }}" class="absolute inset-0 w-full h-full z-20 object-cover pointer-events-none">
                 <div class="absolute inset-0 z-10">
                     <div class="absolute left-1/2 -translate-x-1/2 top-[8%] w-[80%] overflow-hidden">
-                        <img src="{{ asset('storage/' . $photos[0]) }}" class="w-full h-full object-cover">
+                        <img src="https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/{{ $photos[0] }}" class="w-full h-full object-cover">
                     </div>
                     <div class="absolute left-1/2 -translate-x-1/2 top-[26.7%] w-[80%] overflow-hidden">
-                        <img src="{{ asset('storage/' . $photos[1]) }}" class="w-full h-full object-cover">
+                        <img src="https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/{{ $photos[1] }}" class="w-full h-full object-cover">
                     </div>
                     <div class="absolute left-1/2 -translate-x-1/2 top-[45.5%] w-[80%] overflow-hidden">
-                        <img src="{{ asset('storage/' . $photos[2]) }}" class="w-full h-full object-cover">
+                        <img src="https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/{{ $photos[2] }}" class="w-full h-full object-cover">
                     </div>
                     <div class="absolute left-1/2 -translate-x-1/2 top-[64%] w-[80%] overflow-hidden">
-                        <img src="{{ asset('storage/' . $photos[3]) }}" class="w-full h-full object-cover">
+                        <img src="https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/{{ $photos[3] }}" class="w-full h-full object-cover">
                     </div>
                 </div>
             </div>
@@ -55,11 +55,12 @@
             </form>
         </div>
         <div class="absolute bottom-8 left-1/2 -translate-x-1/2">
-            <form action="/photo/save-frame/{{ $order->order_id }}" method="post">
+            <form id="form-submit" action="/photo/save-frame/{{ $order->order_id }}" method="post">
             @csrf
                 <input type="hidden" name="selected_frame" id="selectedFrameId" value="{{ $frames[0]['id'] }}">
                 <input class="hidden" type="email" name="email" id="email" value="noufalraditya068@gmail.com">
-                <button type="submit" class="flex items-center justify-center w-12 h-12 bg-blue-900 text-white rounded-full hover:scale-110 transition-transform shadow-xl">
+                <input type="hidden" id="input-hidden-final-photo" name="final_photo">
+                <button id="btn-simpan" name="tombol_simpan" type="button" class="flex items-center justify-center w-12 h-12 bg-blue-900 text-white rounded-full hover:scale-110 transition-transform shadow-xl">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
                     </svg>
@@ -96,6 +97,86 @@
             }
             updateFrame(currentIndex);
         });
+
+        document.getElementById('btn-simpan').addEventListener('click', async function() {
+            const arrayFotoUser = [
+                "https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/{{ $photos[0] }}",
+                "https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/{{ $photos[1] }}",
+                "https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/{{ $photos[2] }}",
+                "https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/{{ $photos[3] }}"
+            ];
+            const linkFrame = `/assets/img/frames/${selectedFrameIdInput.value}.png`;
+
+            const hasilGabungan = await generateFinalPhoto(arrayFotoUser, linkFrame);
+
+            if (hasilGabungan) {
+                document.getElementById('input-hidden-final-photo').value = hasilGabungan;
+                document.getElementById('form-submit').submit();
+            }
+        });
+
+        function loadImage(src) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = "Anonymous";
+                img.onload = () => resolve(img);
+                img.onerror = (e) => reject(new Error('Gagal meload gambar: ' + src));
+                img.src = src;
+            });
+        }
+
+        async function generateFinalPhoto(photoUrls, frameUrl) {
+            try {
+                const frameImg = await loadImage(frameUrl);
+                const photos = await Promise.all(photoUrls.map(url => loadImage(url)));
+
+                const canvas = document.createElement('canvas');
+                canvas.width = frameImg.width;
+                canvas.height = frameImg.height;
+                const ctx = canvas.getContext('2d');
+
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                const widthPercent = 0.80;
+                const heightPercent = 0.175;
+                const topPercentages = [0.08, 0.267, 0.455, 0.64];
+
+                const photoWidth = Math.floor(canvas.width * widthPercent);
+                const photoHeight = Math.floor(canvas.height * heightPercent);
+                const xOffset = Math.floor((canvas.width - photoWidth) / 2);
+
+                photos.forEach((photo, index) => {
+                    if (topPercentages[index]) {
+                        const yOffset = Math.floor(canvas.height * topPercentages[index]);
+                        
+                        const srcRatio = photo.width / photo.height;
+                        const dstRatio = photoWidth / photoHeight;
+                        let sWidth = photo.width, sHeight = photo.height, sx = 0, sy = 0;
+
+                        if (srcRatio > dstRatio) {
+                            sWidth = photo.height * dstRatio;
+                            sx = (photo.width - sWidth) / 2;
+                        } else {
+                            sHeight = photo.width / dstRatio;
+                            sy = (photo.height - sHeight) / 2;
+                        }
+
+                        ctx.drawImage(photo, sx, sy, sWidth, sHeight, xOffset, yOffset, photoWidth, photoHeight);
+                    }
+                });
+
+                ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
+
+                const finalBase64 = canvas.toDataURL('image/png');
+                return finalBase64;
+
+            } catch (error) {
+                console.error(error);
+                alert("Gagal memproses gambar!");
+                return null;
+            }
+        }
     </script>
 </body>
 </html>
