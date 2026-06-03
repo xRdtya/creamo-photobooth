@@ -1,6 +1,6 @@
 {
     "version": 2,
-    "buildCommand": "echo 'Skipping build'",
+    "buildCommand": "echo 'Build skipped by vercel.json'",
     "outputDirectory": ".",
     "functions": {
         "api/index.php": {
