@@ -41,8 +41,8 @@ class PhotoSessionController extends Controller
             $savedPaths = [];
             $folderPath = "photos/" . $orderId;
 
-            if (!Storage::disk('public')->exists($folderPath)) {
-                Storage::disk('public')->makeDirectory($folderPath);
+            if (!Storage::disk('s3')->exists($folderPath)) {
+                Storage::disk('s3')->makeDirectory($folderPath);
             }
 
             foreach ($photos as $index => $base64Data) {
@@ -53,7 +53,7 @@ class PhotoSessionController extends Controller
                 $fileName = "photo_" . ($index + 1) . "_" . time() . ".png";
                 $fullPath = $folderPath . "/" . $fileName;
 
-                Storage::disk('public')->put($fullPath, $data);
+                Storage::disk('s3')->put($fullPath, $data);
 
                 $savedPaths[] = $fullPath;
             }
@@ -132,7 +132,7 @@ class PhotoSessionController extends Controller
                 if (isset($yOffsets[$index]) && !empty(trim($photoPath))) {
 
                     $cleanedPath = trim(str_replace(['public/', 'storage/'], '', $photoPath));
-                    $fullPath = Storage::disk('public')->path($cleanedPath);
+                    $fullPath = Storage::disk('s3')->path($cleanedPath);
 
                     if (!file_exists($fullPath)) {
                         return redirect('/photo')->withErrors([
@@ -197,11 +197,11 @@ class PhotoSessionController extends Controller
             $finalFolder = 'photos/' . $orderId;
             $finalFullPath = $finalFolder . '/' . $finalFileName;
 
-            if (!Storage::disk('public')->exists($finalFolder)) {
-                Storage::disk('public')->makeDirectory($finalFolder);
+            if (!Storage::disk('s3')->exists($finalFolder)) {
+                Storage::disk('s3')->makeDirectory($finalFolder);
             }
 
-            Storage::disk('public')->put($finalFullPath, $encodedImage);
+            Storage::disk('s3')->put($finalFullPath, $encodedImage);
 
         
             $transaction->email = $request->email;
@@ -243,11 +243,11 @@ class PhotoSessionController extends Controller
 
             $path = $session->kode_download;
 
-            if ($path && Storage::disk('public')->exists($path)) {
+            if ($path && Storage::disk('s3')->exists($path)) {
 
                 $customFileName = 'Creamo_' . $orderId . '.png';
 
-                return Storage::disk('public')->download($path, $customFileName);
+                return Storage::disk('s3')->download($path, $customFileName);
             }
 
             return redirect()->back()->withErrors(['error' => 'File foto tidak ditemukan di server.']);

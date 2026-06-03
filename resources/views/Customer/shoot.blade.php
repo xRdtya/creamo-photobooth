@@ -220,11 +220,8 @@
             try {
                 const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                 
-                // ---- PROSES KOMPRESI DIMULAI ----
                 console.log('Sedang mengompres foto sebelum di-upload...');
                 
-                // Mengompres semua foto di dalam array 'capturedPhotos' secara bersamaan (concurrently)
-                // Batas maksimal lebar/tinggi diatur 1200px dengan kualitas 70% (0.7) agar aman dari limit Vercel
                 const compressedPhotos = await Promise.all(
                     capturedPhotos.map(photo => compressBase64Image(photo, 1200, 1200, 0.7))
                 );
