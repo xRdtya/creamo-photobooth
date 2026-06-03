@@ -41,18 +41,22 @@ class PhotoSessionController extends Controller
             $savedPaths = [];
             $folderPath = "photos/" . $orderId;
 
-            if (!Storage::disk('s3')->exists($folderPath)) {
-                Storage::disk('s3')->makeDirectory($folderPath);
-            }
-
             foreach ($photos as $index => $base64Data) {
-                $img = str_replace('data:image/png;base64,', '', $base64Data);
+                // FIX: Pakai REGEX biar semua format header (png, jpeg, jpg) otomatis terhapus dengan bersih!
+                $img = preg_replace('#^data:image/\w+;base64,#i', '', $base64Data);
                 $img = str_replace(' ', '+', $img);
+
                 $data = base64_decode($img);
+
+                // Validasi tambahan: Cek apakah hasil decode menghasilkan data kosong
+                if ($data === false) {
+                    return response()->json(['success' => false, 'message' => 'Gagal membaca data foto ke-' . ($index + 1)], 500);
+                }
 
                 $fileName = "photo_" . ($index + 1) . "_" . time() . ".png";
                 $fullPath = $folderPath . "/" . $fileName;
 
+                // Upload ke Supabase S3
                 Storage::disk('s3')->put($fullPath, $data);
 
                 $savedPaths[] = $fullPath;
@@ -69,9 +73,7 @@ class PhotoSessionController extends Controller
             }
 
             $session->link_file_foto = implode(',', $savedPaths);
-
             $session->waktu_selesai = now();
-
             $session->save();
 
             return response()->json([
