@@ -183,10 +183,55 @@
             startTimer();
         });
 
+        function compressBase64Image(base64Str, maxWidth = 1200, maxHeight = 1200, quality = 0.7) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.src = base64Str;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+
+                    // Proporsikan ukuran gambar jika melebihi batas maksimal
+                    if (width > maxWidth) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
+                    }
+                    if (height > maxHeight) {
+                        width = Math.round((width * maxHeight) / height);
+                        height = maxHeight;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Konversi canvas menjadi string Base64 berformat JPEG yang jauh lebih ringan
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+                    resolve(compressedBase64);
+                };
+                img.onerror = (err) => reject(err);
+            });
+        }
+
         async function uploadAllPhotosToServer() {
             try {
                 const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                 
+                // ---- PROSES KOMPRESI DIMULAI ----
+                console.log('Sedang mengompres foto sebelum di-upload...');
+                
+                // Mengompres semua foto di dalam array 'capturedPhotos' secara bersamaan (concurrently)
+                // Batas maksimal lebar/tinggi diatur 1200px dengan kualitas 70% (0.7) agar aman dari limit Vercel
+                const compressedPhotos = await Promise.all(
+                    capturedPhotos.map(photo => compressBase64Image(photo, 1200, 1200, 0.7))
+                );
+                
+                console.log('Kompresi selesai! Mengirim data ke server...');
+                // ---- PROSES KOMPRESI SELESAI ----
+
                 const response = await fetch('/photo/upload', { 
                     method: 'POST',
                     headers: {
@@ -195,7 +240,7 @@
                     },
                     body: JSON.stringify({
                         order_id: orderId,
-                        photos: capturedPhotos
+                        photos: compressedPhotos // Mengirimkan foto yang SUDAH DIKOMPRES
                     })
                 });
 
