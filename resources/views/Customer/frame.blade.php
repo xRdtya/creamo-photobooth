@@ -25,7 +25,7 @@
                 <img id="displayFrame" src="{{ asset('assets/img/frames/' . $frames[0]['image']) }}" class="absolute inset-0 w-full h-full z-20 object-cover pointer-events-none">
                 <div class="absolute inset-0 z-10">
                     <div class="absolute left-1/2 -translate-x-1/2 top-[8%] w-[80%] overflow-hidden">
-                        <img src="https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/{{ $photos[0] }}" class="w-full h-full object-cover">
+                        <img src="https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/7.png" class="w-full h-full object-cover">
                     </div>
                     <div class="absolute left-1/2 -translate-x-1/2 top-[26.7%] w-[80%] overflow-hidden">
                         <img src="https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/{{ $photos[1] }}" class="w-full h-full object-cover">
