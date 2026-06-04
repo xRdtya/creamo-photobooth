@@ -1020,8 +1020,8 @@ new Chart(revCtx, {
                 barPercentage: 0.5,
             },
             {
-                label: 'Last Week (est.)',
-                data: revenueData.map(d => Math.round(d.value * 0.88 + Math.random() * 5000)),
+                label: 'Last Week',
+                data: revenueData.map(d => d.value),
                 backgroundColor: '#cbd5e1',
                 borderRadius: 6,
                 barPercentage: 0.5,
