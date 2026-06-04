@@ -68,6 +68,7 @@
             </form>
         </div>
     </section>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         const frames = @json($frames);
         let currentIndex = 0;
