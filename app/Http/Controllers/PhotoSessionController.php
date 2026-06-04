@@ -84,33 +84,22 @@ class PhotoSessionController extends Controller
 
     public function saveFrame(Request $request, $orderId)
     {
+        dd($request);
         $transaction = Transaction::where('order_id', $orderId)->firstOrFail();
         $session = PhotoSession::where('transaction_id', $transaction->id)->firstOrFail();
 
-        $base64Image = $request->input('final_photo');
-
-        if (preg_match('/^data:image\/(\w+);base64,/', $base64Image, $type)) {
-            $base64Image = substr($base64Image, strpos($base64Image, ',') + 1);
-
-            $extension = strtolower($type[1]);
-
-            $imageData = base64_decode($base64Image);
-
-            if ($imageData === false) {
-                return redirect()->back()->with('error', 'Gagal memproses data gambar.');
-            }
-        } else {
-            return redirect()->back()->with('error', 'Data gambar tidak ditemukan.');
-        }
-        $fileName = "final_" . $orderId . "_" . time() . '.' . $extension;
-
-        $filePath = 'photos/' . $orderId . '/' . $fileName;
+        // $order = Order::where('order_id', $request->order_id)->first();
+        // if ($order) {
+        //     $order->status = 'completed';
+        //     $order->photo_url = $request->image_url; // Simpan link dari Supabase tadi
+        //     $order->save();
+        // }
 
         $transaction->email = $request->email;
         $transaction->save();
 
         // $session->email = $request->email;
-        $session->kode_download = $filePath;
+        // $session->kode_download = $request->;
         $session->save();
 
         $downloadLink = route('photo.view', $orderId);
@@ -121,14 +110,7 @@ class PhotoSessionController extends Controller
                 ->subject('Hasil Foto Photobooth Kamu Sudah Jadi! 📸');
         });
 
-        unset($imageData);
-        unset($base64Image);
-
-        return response('
-            <script>
-                window.location.href = "/halaman-tujuan";
-            </script>
-        ');
+        return response()->json(['success' => true]);
     }
 
     public function viewPhoto($orderId)

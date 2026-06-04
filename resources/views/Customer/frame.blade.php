@@ -126,7 +126,7 @@
                 const { data, error } = await supabaseClient
                     .storage
                     .from('photos')
-                    .upload(`${orderId}/final_${Date.now()}.jpg`, blob);
+                    .upload(`photos/${orderId}/final_${Date.now()}.jpg`, blob);
 
                 if (error) {
                     console.error("Gagal upload ke Supabase:", error);
