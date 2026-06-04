@@ -132,8 +132,31 @@
                     console.error("Gagal upload ke Supabase:", error);
                     alert("Gagal upload: " + error.message);
                 } else {
-                    alert("Upload sukses langsung dari browser bray!");
-                    window.location.href = "/photo"; 
+                    const { data: publicUrlData } = supabaseClient
+                        .storage
+                        .from('photos')
+                        .getPublicUrl(`photos/${orderId}/final_${Date.now()}.jpg`);
+                    
+                    const fileUrl = publicUrlData.publicUrl;
+
+                    const responseLaravel = await fetch(`/photo/save-frame/${orderId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // CSRF token Laravel
+                        },
+                        body: JSON.stringify({
+                            order_id: orderId,
+                            image_url: fileUrl
+                        })
+                    });
+
+                    if (responseLaravel.ok) {
+                        alert("Data berhasil dicatat di database dan Supabase!");
+                        window.location.href = "/photo"; 
+                    } else {
+                        alert("File masuk Supabase, tapi gagal dicatat di database lokal.");
+                    } 
                 }
             } catch (err) {
                 console.error("Error internal JS:", err);
