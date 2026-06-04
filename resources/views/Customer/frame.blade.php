@@ -120,21 +120,9 @@
 
         async function uploadKeSupabase(base64Data, orderId) {
             try {
-                // Pemotong otomatis: Jika ada tanda koma, ambil data setelah koma. Jika tidak, pakai data asli.
-                const base64Clean = base64Data.includes(',') ? base64Data.split(',') : base64Data;
-                
-                // Sekarang atob dijamin dapet string beneran murni tanpa karakter aneh
-                const byteString = atob(base64Clean); 
-                const ab = new ArrayBuffer(byteString.length);
-                const ia = new Uint8Array(ab);
-                
-                for (let i = 0; i < byteString.length; i++) {
-                    ia[i] = byteString.charCodeAt(i);
-                }
-                
-                const blob = new Blob([ia], { type: 'image/jpeg' });
+                const response = await fetch(base64Data);
+                const blob = await response.blob(); 
 
-                // Proses kirim ke Supabase
                 const { data, error } = await supabaseClient
                     .storage
                     .from('photos')
@@ -145,12 +133,11 @@
                     alert("Gagal upload: " + error.message);
                 } else {
                     alert("Upload sukses langsung dari browser bray!");
-                    // Sesuaikan url ini dengan rute halaman sukses lu
-                    window.location.href = "/halaman-sukses"; 
+                    window.location.href = "/photo"; 
                 }
             } catch (err) {
-                console.error("Error internal JS:", err.message);
-                alert("Terjadi kesalahan pada sistem pemrosesan gambar.");
+                console.error("Error internal JS:", err);
+                alert("Terjadi kesalahan: " + err.message); 
             }
         }
 
