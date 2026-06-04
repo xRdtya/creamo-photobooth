@@ -84,6 +84,7 @@ class PhotoSessionController extends Controller
 
     public function saveFrame(Request $request, $Order_id)
     {
+        dd($request);
         try {  
             $transaction = Transaction::where('order_id', $Order_id)->firstOrFail();
     
