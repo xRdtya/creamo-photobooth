@@ -115,7 +115,7 @@ class PhotoSessionController extends Controller
     
             if ($customerEmail) {
                 try {
-                    $downloadLink = route('photo.view', $orderId);
+                    $downloadLink = route('photo.view', $Order_id);
     
                     Mail::send('email.photo_link', ['downloadLink' => $downloadLink], function ($message) use ($customerEmail) {
                         $message->to($customerEmail)
