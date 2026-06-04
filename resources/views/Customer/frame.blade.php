@@ -73,7 +73,7 @@
         const frames = @json($frames);
         let currentIndex = 0;
         const { createClient } = supabase; 
-        const supabaseClient = createClient('https://ywrswuyjuvgrnfmugxwm.supabase.co', '1dc2d4b6284276b84d214d0a34963e9f');
+        const supabaseClient = createClient('https://ywrswuyjuvgrnfmugxwm.supabase.co', 'sb_publishable_dCTMWJdBw9MYQrIonQmjtA_3jJYiiqz');
 
         const displayFrame = document.getElementById('displayFrame');
         const selectedFrameIdInput = document.getElementById('selectedFrameId');
