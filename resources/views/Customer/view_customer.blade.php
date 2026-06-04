@@ -16,18 +16,18 @@
             <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-1">Foto Kamu Sudah Siap! ✨</h1>
             <p class="text-gray-500 text-xs md:text-sm mb-6">Order ID: #{{ $orderId }}</p>
 
-            <div class="mb-6 border-4 border-white rounded-2xl overflow-hidden shadow-lg max-w-[200px] md:max-w-[220px] w-full transition-transform hover:scale-105 duration-300">
-                <img src="https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/{{ $session->kode_download }}" alt="Hasil Foto Photobooth" class="w-full h-auto block">
+            <div class="mb-6 border-4 border-white rounded-2xl overflow-hidden shadow-lg max-w-50 md:max-w-55 w-full transition-transform hover:scale-105 duration-300">
+                <img src="{{ $session->kode_download }}" alt="Hasil Foto Photobooth" class="w-full h-auto block">
             </div>
 
-            <div class="w-full max-w-[280px] mb-3">
+            <div class="w-full max-w-70 mb-3">
                 <a href="{{ route('photo.download', $orderId) }}" 
                    class="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl shadow-md transition duration-200 text-base md:text-lg">
                     📥 Download Ke HP / Perangkat
                 </a>
             </div>
             
-            <p class="text-[11px] md:text-xs text-gray-400 max-w-[280px] leading-relaxed">
+            <p class="text-[11px] md:text-xs text-gray-400 max-w-70 leading-relaxed">
                 Tips: Jika download tidak berjalan otomatis, tahan lama pada gambar lalu pilih "Simpan Gambar".
             </p>
         </section>

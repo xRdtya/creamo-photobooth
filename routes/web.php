@@ -5,10 +5,13 @@ use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\SocialAuthController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\DevicePingController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function() {
-    return view("landing");
+    $merchant = Auth::guard('merchant')->user();
+
+    return view("landing", compact('merchant'));
 });
 
 Route::middleware(['guest:merchant'])->group(function() {

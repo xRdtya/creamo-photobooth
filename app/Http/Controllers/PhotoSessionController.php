@@ -51,7 +51,7 @@ class PhotoSessionController extends Controller
                     return response()->json(['success' => false, 'message' => 'Gagal membaca data foto ke-' . ($index + 1)], 500);
                 }
 
-                $fileName = "photo_" . ($index + 1) . "_" . time() . ".png";
+                $fileName = "photo_" . ($index + 1) . "_" . ($orderId) . ".png";
                 $fullPath = $folderPath . "/" . $fileName;
 
                 Storage::disk('s3')->put($fullPath, $data);
