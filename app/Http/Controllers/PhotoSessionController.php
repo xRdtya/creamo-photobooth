@@ -84,33 +84,57 @@ class PhotoSessionController extends Controller
 
     public function saveFrame(Request $request, $Order_id)
     {
-        dd($request);
-        $transaction = Transaction::where('order_id', $Order_id)->firstOrFail();
-        $session = PhotoSession::where('transaction_id', $transaction->id)->firstOrFail();
-
-        // $order = Order::where('order_id', $request->order_id)->first();
-        // if ($order) {
-        //     $order->status = 'completed';
-        //     $order->photo_url = $request->image_url; // Simpan link dari Supabase tadi
-        //     $order->save();
-        // }
-
-        $transaction->email = $request->email;
-        $transaction->save();
-
-        // $session->email = $request->email;
-        // $session->kode_download = $request->;
-        $session->save();
-
-        $downloadLink = route('photo.view', $Order_id);
-
-        $customerEmail = $request->email;
-        Mail::send('email.photo_link', ['downloadLink' => $downloadLink], function ($message) use ($customerEmail) {
-            $message->to($customerEmail)
-                ->subject('Hasil Foto Photobooth Kamu Sudah Jadi! 📸');
-        });
-
-        return response()->json(['success' => true]);
+        try {  
+            $transaction = Transaction::where('order_id', $Order_id)->firstOrFail();
+    
+            if (!$transaction) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Gagal: Order ID {$Order_id} tidak ditemukan di tabel transactions!"
+                ], 404);
+            }
+    
+            $session = PhotoSession::where('transaction_id', $transaction->id)->firstOrFail();
+    
+            if (!$session) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Gagal: Session untuk transaksi ID {$transaction->id} tidak ditemukan!"
+                ], 404);
+            }
+    
+            $session->kode_download = $request->image_url;
+            $session->save();
+    
+            if ($request->has('email') && $request->email != null) {
+                $transaction->email = $request->email;
+                $transaction->save();
+            }
+    
+            $customerEmail = $request->email ?? $transaction->email;
+    
+            if ($customerEmail) {
+                try {
+                    $downloadLink = route('photo.view', $orderId);
+    
+                    Mail::send('email.photo_link', ['downloadLink' => $downloadLink], function ($message) use ($customerEmail) {
+                        $message->to($customerEmail)
+                            ->subject('Hasil Foto Photobooth Kamu Sudah Jadi! 📸');
+                    });
+                } catch (\Exception $mailException) {
+                    // Kalau kirim email gagal (misal SMTP Vercel belum disetting), 
+                    // biarkan saja agar tidak bikin aplikasi crash. Yang penting DB & Supabase aman!
+                }
+            }
+    
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi error internal di Laravel bray!',
+                'error_detail' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function viewPhoto($orderId)
