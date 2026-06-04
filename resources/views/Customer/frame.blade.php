@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-screen!">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +8,7 @@
     <title>CREAMO | Create a Moment</title>
     <link rel="shortcut icon" href="/assets/img/logo.svg" type="image/x-icon">
 </head>
-<body style="background-image: url(/assets/img/bg.png)" class="relative h-screen bg-no-repeat bg-cover flex justify-center items-center">
+<body style="background-image: url(/assets/img/bg.png)" class="relative h-screen! bg-no-repeat bg-cover flex justify-center items-center">
     <section style="background-image: url(/assets/img/bg2.png)" class="relative w-11/12 h-11/12 max-w-4xl backdrop-blur-md rounded-[2.5rem] shadow-2xl p-10 pb-20 border border-white/60">
         <div class="absolute top-8 left-10">
             <img src="/assets/img/logocreamo.png" class="w-[40%]" alt="Logo">
@@ -69,6 +69,7 @@
         </div>
     </section>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         const frames = @json($frames);
         let currentIndex = 0;
@@ -120,7 +121,18 @@
 
         async function uploadKeSupabase(base64Data, orderId) {
             try {
-                const namaFile = `/photos/${orderId}/final_${Date.now()}.jpg`;
+                Swal.fire({
+                    title: 'Menyimpan Foto Final...',
+                    html: 'Sedang memproses dan mengunggah hasil akhir ke Supabase.<br>Mohon tunggu sebentar.',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                const namaFile = `${orderId}/final_${orderId}.jpg`;
+                
                 const responseGambar = await fetch(base64Data);
                 const blobGambar = await responseGambar.blob();
 
@@ -128,43 +140,60 @@
                     .storage
                     .from('photos')
                     .upload(namaFile, blobGambar, {
-                        contentType: 'image/jpeg'
+                        contentType: 'image/jpeg',
+                        upsert: true
                     });
 
                 if (error) {
                     console.error("Gagal upload ke Supabase:", error);
-                    alert("Gagal upload: " + error.message);
-                } else {
-                    const { data: publicUrlData } = supabaseClient
-                        .storage
-                        .from('photos')
-                        .getPublicUrl(`photos/${orderId}/final_${Date.now()}.jpg`);
-                    
-                    const fileUrl = publicUrlData.publicUrl;
-                    const emailPelanggan = document.getElementById('email').value;
-
-                    const responseLaravel = await fetch(`/photo/save-frame/${orderId}`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({
-                            image_url: fileUrl,
-                            email: emailPelanggan
-                        })
-                    });
-
-                    if (responseLaravel.ok) {
-                        alert("Data berhasil dicatat di database dan Supabase!");
-                        window.location.href = "/photo"; 
-                    } else {
-                        alert("File masuk Supabase, tapi gagal dicatat di database lokal.");
-                    } 
+                    Swal.close();
+                    Swal.fire({ icon: 'error', title: 'Upload Supabase Gagal', text: error.message });
+                    return;
                 }
+
+                const { data: publicUrlData } = supabaseClient
+                    .storage
+                    .from('photos')
+                    .getPublicUrl(namaFile);
+                
+                const fileUrl = publicUrlData.publicUrl;
+                const emailPelanggan = document.getElementById('email').value;
+
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+
+                const responseLaravel = await fetch(`/photo/save-frame/${orderId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({
+                        image_url: fileUrl,
+                        email: emailPelanggan
+                    })
+                });
+
+                Swal.close(); 
+
+                if (responseLaravel.ok) {
+                    window.location.href = "/photo"; 
+                } else {
+                    const errorResult = await responseLaravel.json().catch(() => ({}));
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal Catat Database',
+                        text: errorResult.message || 'File masuk Supabase, tapi gagal dicatat di database lokal.'
+                    });
+                }
+
             } catch (err) {
                 console.error("Error internal JS:", err);
-                alert("Terjadi kesalahan: " + err.message); 
+                Swal.close();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Terjadi Kesalahan',
+                    text: 'Jaringan terputus atau internal error: ' + err.message
+                });
             }
         }
 

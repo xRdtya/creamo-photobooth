@@ -27,7 +27,7 @@
                 @endguest
                 @auth('merchant')
                 <li class="flex justify-center overflow-hidden w-12 h-12 rounded-full bg-queaternary border-0">
-                    <a href="/dashboard" class="flex border-0 p-0 m-0">
+                    <a href="{{ ($merchant?->subscription == 'active') ? '/dashboard' : '#subs' }}" class="flex border-0 p-0 m-0">
                         <svg class="w-12 h-12 mt-2 -mb-2 text-secondary" fill="var(--color-secondary)" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                             <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
                         </svg>
