@@ -15,7 +15,7 @@
         </a>
     </p>
 
-    <p>Jika tombol di atas tidak berfungsi, lu juga bisa salin link di bawah ini ke browser:</p>
+    <p>Jika tombol di atas tidak berfungsi, kamu juga bisa salin link di bawah ini ke browser:</p>
     <p><a href="{{ $downloadLink }}">{{ $downloadLink }}</a></p>
     
     <br>
