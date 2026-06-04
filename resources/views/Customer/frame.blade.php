@@ -149,7 +149,7 @@
                     window.location.href = "/halaman-sukses"; 
                 }
             } catch (err) {
-                console.error("Error internal JS:", err);
+                console.error("Error internal JS:", err.message);
                 alert("Terjadi kesalahan pada sistem pemrosesan gambar.");
             }
         }
