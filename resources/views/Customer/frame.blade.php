@@ -68,9 +68,12 @@
             </form>
         </div>
     </section>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         const frames = @json($frames);
         let currentIndex = 0;
+        const { createClient } = supabase; 
+        const supabaseClient = createClient('https://ywrswuyjuvgrnfmugxwm.supabase.co', 'sb_publishable_dCTMWJdBw9MYQrIonQmjtA_3jJYiiqz');
 
         const displayFrame = document.getElementById('displayFrame');
         const selectedFrameIdInput = document.getElementById('selectedFrameId');
@@ -111,9 +114,59 @@
 
             if (hasilGabungan) {
                 document.getElementById('input-hidden-final-photo').value = hasilGabungan;
-                document.getElementById('form-submit').submit();
+                await uploadKeSupabase(hasilGabungan, '{{ $order->order_id }}');
             }
         });
+
+        async function uploadKeSupabase(base64Data, orderId) {
+            try {
+                const namaFile = `/photos/${orderId}/final_${Date.now()}.jpg`;
+                const responseGambar = await fetch(base64Data);
+                const blobGambar = await responseGambar.blob();
+
+                const { data, error } = await supabaseClient
+                    .storage
+                    .from('photos')
+                    .upload(namaFile, blobGambar, {
+                        contentType: 'image/jpeg'
+                    });
+
+                if (error) {
+                    console.error("Gagal upload ke Supabase:", error);
+                    alert("Gagal upload: " + error.message);
+                } else {
+                    const { data: publicUrlData } = supabaseClient
+                        .storage
+                        .from('photos')
+                        .getPublicUrl(`photos/${orderId}/final_${Date.now()}.jpg`);
+                    
+                    const fileUrl = publicUrlData.publicUrl;
+                    const emailPelanggan = document.getElementById('email').value;
+
+                    const responseLaravel = await fetch(`/photo/save-frame/${orderId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            image_url: fileUrl,
+                            email: emailPelanggan
+                        })
+                    });
+
+                    if (responseLaravel.ok) {
+                        alert("Data berhasil dicatat di database dan Supabase!");
+                        window.location.href = "/photo"; 
+                    } else {
+                        alert("File masuk Supabase, tapi gagal dicatat di database lokal.");
+                    } 
+                }
+            } catch (err) {
+                console.error("Error internal JS:", err);
+                alert("Terjadi kesalahan: " + err.message); 
+            }
+        }
 
         function loadImage(src) {
             return new Promise((resolve, reject) => {

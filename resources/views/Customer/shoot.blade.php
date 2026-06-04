@@ -192,7 +192,6 @@
                     let width = img.width;
                     let height = img.height;
 
-                    // Proporsikan ukuran gambar jika melebihi batas maksimal
                     if (width > maxWidth) {
                         height = Math.round((height * maxWidth) / width);
                         width = maxWidth;
@@ -208,8 +207,7 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
 
-                    // Konversi canvas menjadi string Base64 berformat JPEG yang jauh lebih ringan
-                    const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
                     resolve(compressedBase64);
                 };
                 img.onerror = (err) => reject(err);
@@ -227,7 +225,6 @@
                 );
                 
                 console.log('Kompresi selesai! Mengirim data ke server...');
-                // ---- PROSES KOMPRESI SELESAI ----
 
                 const response = await fetch('/photo/upload', { 
                     method: 'POST',
@@ -237,7 +234,7 @@
                     },
                     body: JSON.stringify({
                         order_id: orderId,
-                        photos: compressedPhotos // Mengirimkan foto yang SUDAH DIKOMPRES
+                        photos: compressedPhotos
                     })
                 });
 
