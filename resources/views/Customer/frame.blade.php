@@ -121,7 +121,7 @@
         async function uploadKeSupabase(base64Data, orderId) {
             try {
                 const namaFile = `/photos/${orderId}/final_${Date.now()}.jpg`;
-                const responseGambar = await fetch(hasilGabungan);
+                const responseGambar = await fetch(base64Data);
                 const blobGambar = await responseGambar.blob();
 
                 const { data, error } = await supabaseClient
