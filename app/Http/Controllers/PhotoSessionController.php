@@ -84,7 +84,9 @@ class PhotoSessionController extends Controller
 
     public function saveFrame(Request $request, $Order_id)
     {
-        dd($request);
+        return response()->json([
+            'ini_hasil_debug_gua' => $request
+        ]);
         try {  
             $transaction = Transaction::where('order_id', $Order_id)->firstOrFail();
     
