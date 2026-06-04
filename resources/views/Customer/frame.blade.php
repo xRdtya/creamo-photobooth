@@ -141,6 +141,7 @@
                         .getPublicUrl(`photos/${orderId}/final_${Date.now()}.jpg`);
                     
                     const fileUrl = publicUrlData.publicUrl;
+                    const emailPelanggan = document.getElementById('email').value;
 
                     const responseLaravel = await fetch(`/photo/save-frame/${orderId}`, {
                         method: 'POST',
@@ -149,7 +150,8 @@
                             'X-CSRF-TOKEN': '{{ csrf_token() }}'
                         },
                         body: JSON.stringify({
-                            image_url: fileUrl
+                            image_url: fileUrl,
+                            email: emailPelanggan
                         })
                     });
 
