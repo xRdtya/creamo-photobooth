@@ -119,23 +119,38 @@
         });
 
         async function uploadKeSupabase(base64Data, orderId) {
-            const byteString = atob(base64Data.split(',')); 
-            const ab = new ArrayBuffer(byteString.length);
-            const ia = new Uint8Array(ab);
-            for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
-            const blob = new Blob([ia], { type: 'image/jpeg' }); // Pake ia (Uint8Array)
+            try {
+                // Pemotong otomatis: Jika ada tanda koma, ambil data setelah koma. Jika tidak, pakai data asli.
+                const base64Clean = base64Data.includes(',') ? base64Data.split(',') : base64Data;
+                
+                // Sekarang atob dijamin dapet string beneran murni tanpa karakter aneh
+                const byteString = atob(base64Clean); 
+                const ab = new ArrayBuffer(byteString.length);
+                const ia = new Uint8Array(ab);
+                
+                for (let i = 0; i < byteString.length; i++) {
+                    ia[i] = byteString.charCodeAt(i);
+                }
+                
+                const blob = new Blob([ia], { type: 'image/jpeg' });
 
-            const { data, error } = await supabaseClient
-                .storage
-                .from('photos')
-                .upload(`${orderId}/final_${Date.now()}.jpg`, blob);
+                // Proses kirim ke Supabase
+                const { data, error } = await supabaseClient
+                    .storage
+                    .from('photos')
+                    .upload(`${orderId}/final_${Date.now()}.jpg`, blob);
 
-            if (error) {
-                console.error("Gagal upload:", error);
-                alert("Gagal upload ke Supabase!");
-            } else {
-                alert("Upload sukses langsung dari browser!");
-                window.location.href = "/halaman-sukses";
+                if (error) {
+                    console.error("Gagal upload ke Supabase:", error);
+                    alert("Gagal upload: " + error.message);
+                } else {
+                    alert("Upload sukses langsung dari browser bray!");
+                    // Sesuaikan url ini dengan rute halaman sukses lu
+                    window.location.href = "/halaman-sukses"; 
+                }
+            } catch (err) {
+                console.error("Error internal JS:", err);
+                alert("Terjadi kesalahan pada sistem pemrosesan gambar.");
             }
         }
 
