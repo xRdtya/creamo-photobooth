@@ -82,10 +82,10 @@ class PhotoSessionController extends Controller
         }
     }
 
-    public function saveFrame(Request $request, $orderId)
+    public function saveFrame(Request $request, $Order_id)
     {
         dd($request);
-        $transaction = Transaction::where('order_id', $orderId)->firstOrFail();
+        $transaction = Transaction::where('order_id', $Order_id)->firstOrFail();
         $session = PhotoSession::where('transaction_id', $transaction->id)->firstOrFail();
 
         // $order = Order::where('order_id', $request->order_id)->first();
@@ -102,7 +102,7 @@ class PhotoSessionController extends Controller
         // $session->kode_download = $request->;
         $session->save();
 
-        $downloadLink = route('photo.view', $orderId);
+        $downloadLink = route('photo.view', $Order_id);
 
         $customerEmail = $request->email;
         Mail::send('email.photo_link', ['downloadLink' => $downloadLink], function ($message) use ($customerEmail) {

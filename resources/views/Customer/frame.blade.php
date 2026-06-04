@@ -120,13 +120,16 @@
 
         async function uploadKeSupabase(base64Data, orderId) {
             try {
-                const response = await fetch(base64Data);
-                const blob = await response.blob(); 
+                const namaFile = `/photos/${orderId}/final_${Date.now()}.jpg`;
+                const responseGambar = await fetch(hasilGabungan);
+                const blobGambar = await responseGambar.blob();
 
                 const { data, error } = await supabaseClient
                     .storage
                     .from('photos')
-                    .upload(`photos/${orderId}/final_${Date.now()}.jpg`, blob);
+                    .upload(namaFile, blobGambar, {
+                        contentType: 'image/jpeg'
+                    });
 
                 if (error) {
                     console.error("Gagal upload ke Supabase:", error);
@@ -146,7 +149,6 @@
                             'X-CSRF-TOKEN': '{{ csrf_token() }}'
                         },
                         body: JSON.stringify({
-                            order_id: orderId,
                             image_url: fileUrl
                         })
                     });
