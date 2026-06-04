@@ -113,7 +113,7 @@
 
             if (hasilGabungan) {
                 document.getElementById('input-hidden-final-photo').value = hasilGabungan;
-                await uploadKeSupabase(hasilGabungan, '{{ $orderId }}');
+                await uploadKeSupabase(hasilGabungan, '{{ $order->order_id }}');
             }
         });
 
