@@ -50,6 +50,19 @@ class AdminDashboardController extends Controller
             ];
         }
 
+        $revenueChartLastWeek = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $day = Carbon::today()->subDays($i + 7);
+            $revenueChartLastWeek[] = [
+                'label' => $day->format('D'),
+                'date'  => $day->format('d'),
+                'value' => Transaction::where('merchant_id', $merchant->id)
+                    ->where('payment_status', 'success')
+                    ->whereDate('created_at', $day)
+                    ->sum('gross_amount'),
+            ];
+        }
+
         // ── Total Customer & Total Foto (hari ini) ────────────────────────
         $totalCustomers = Transaction::where('merchant_id', $merchant->id)
             ->where('payment_status', 'success')
@@ -134,6 +147,7 @@ class AdminDashboardController extends Controller
             'revenueChart',
             'totalCustomers',
             'customerGrowth',
+            'revenueChartLastWeek',
             'totalPhotosToday',
             'photoGrowth',
             'transactions',
