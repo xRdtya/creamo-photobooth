@@ -14,58 +14,94 @@
             <img src="/assets/img/logocreamo.png" class="w-[40%]" alt="Logo">
             <p class="font-montserrat text-queaternary text-xl">Create a moment</p>
         </div>
-        <h2 class="text-center text-2xl font-bold text-blue-900 mt-12 mb-10">Pilih Bingkai Foto Favoritmu</h2>
-        <div class="flex items-center justify-center gap-12 h-[80%]">
-            <button id="btnPrev" type="button" class="transition-transform hover:-translate-x-2 active:scale-95 drop-shadow-lg">
-                <svg class="w-16 h-16 text-blue-900" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20 4L4 12L20 20Z" />
-                </svg>
-            </button>
-            <div class="relative aspect-1/3 rounded-lg overflow-hidden h-full">
-                <img id="displayFrame" src="{{ asset('assets/img/frames/' . $frames[0]['image']) }}" class="absolute inset-0 w-full h-full z-20 object-cover pointer-events-none">
-                <div class="absolute inset-0 z-10">
-                    <div class="absolute left-1/2 -translate-x-1/2 top-[8%] w-[80%] overflow-hidden">
-                        <img src="https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/{{ $photos[0] }}" class="w-full h-full object-cover">
-                    </div>
-                    <div class="absolute left-1/2 -translate-x-1/2 top-[26.7%] w-[80%] overflow-hidden">
-                        <img src="https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/{{ $photos[1] }}" class="w-full h-full object-cover">
-                    </div>
-                    <div class="absolute left-1/2 -translate-x-1/2 top-[45.5%] w-[80%] overflow-hidden">
-                        <img src="https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/{{ $photos[2] }}" class="w-full h-full object-cover">
-                    </div>
-                    <div class="absolute left-1/2 -translate-x-1/2 top-[64%] w-[80%] overflow-hidden">
-                        <img src="https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/{{ $photos[3] }}" class="w-full h-full object-cover">
+        <div id="selectFrame" class="block h-full">
+            <h2 class="text-center text-2xl font-bold text-blue-900 mt-12 mb-10">Pilih Bingkai Foto Favoritmu</h2>
+            <div class="flex items-center justify-center gap-12 h-[80%]">
+                <button id="btnPrev" type="button" class="transition-transform hover:-translate-x-2 active:scale-95 drop-shadow-lg">
+                    <svg class="w-16 h-16 text-blue-900" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20 4L4 12L20 20Z" />
+                    </svg>
+                </button>
+                <div class="relative aspect-1/3 rounded-lg overflow-hidden h-full">
+                    <img id="displayFrame" src="{{ asset('assets/img/frames/' . $frames[0]['image']) }}" class="absolute inset-0 w-full h-full z-20 object-cover pointer-events-none">
+                    <div class="absolute inset-0 z-10">
+                        <div class="absolute left-1/2 -translate-x-1/2 top-[8%] w-[80%] overflow-hidden">
+                            <img src="https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/{{ $photos[0] }}" class="w-full h-full object-cover">
+                        </div>
+                        <div class="absolute left-1/2 -translate-x-1/2 top-[26.7%] w-[80%] overflow-hidden">
+                            <img src="https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/{{ $photos[1] }}" class="w-full h-full object-cover">
+                        </div>
+                        <div class="absolute left-1/2 -translate-x-1/2 top-[45.5%] w-[80%] overflow-hidden">
+                            <img src="https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/{{ $photos[2] }}" class="w-full h-full object-cover">
+                        </div>
+                        <div class="absolute left-1/2 -translate-x-1/2 top-[64%] w-[80%] overflow-hidden">
+                            <img src="https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/{{ $photos[3] }}" class="w-full h-full object-cover">
+                        </div>
                     </div>
                 </div>
+                <button id="btnNext" type="button" class="transition-transform hover:translate-x-2 active:scale-95 drop-shadow-lg">
+                    <svg class="w-16 h-16 text-blue-900" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M4 4L20 12L4 20Z" />
+                    </svg>
+                </button>
             </div>
-            <button id="btnNext" type="button" class="transition-transform hover:translate-x-2 active:scale-95 drop-shadow-lg">
-                <svg class="w-16 h-16 text-blue-900" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M4 4L20 12L4 20Z" />
-                </svg>
-            </button>
-        </div>
-        <div class="absolute bottom-10 left-10">
-            <form method="POST" action="/photo/shoot/{{ $order->order_id }}" class="flex items-center justify-center w-14 h-14 border-[3px] border-blue-900 text-blue-900 rounded-full hover:bg-blue-900 hover:text-white transition-colors shadow-md">
+            <div class="absolute bottom-10 left-10">
+                <form method="POST" action="/photo/shoot/{{ $order->order_id }}" class="flex items-center justify-center w-14 h-14 border-[3px] border-blue-900 text-blue-900 rounded-full hover:bg-blue-900 hover:text-white transition-colors shadow-md">
+                    @csrf
+                    <button type="submit">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+            <div class="absolute bottom-8 left-1/2 -translate-x-1/2">
+                <form id="form-submit" action="/photo/save-frame/{{ $order->order_id }}" method="post">
                 @csrf
-                <button type="submit">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                </button>
-            </form>
+                    <input type="hidden" name="selected_frame" id="selectedFrameId" value="{{ $frames[0]['id'] }}">
+                    <input type="hidden" id="input-hidden-final-photo" name="final_photo">
+                    <button id="btn-simpan" name="tombol_simpan" type="button" class="flex items-center justify-center w-12 h-12 bg-blue-900 text-white rounded-full hover:scale-110 transition-transform shadow-xl">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </button>
+                </form>
+            </div>
         </div>
-        <div class="absolute bottom-8 left-1/2 -translate-x-1/2">
-            <form id="form-submit" action="/photo/save-frame/{{ $order->order_id }}" method="post">
-            @csrf
-                <input type="hidden" name="selected_frame" id="selectedFrameId" value="{{ $frames[0]['id'] }}">
-                <input class="hidden" type="email" name="email" id="email" value="noufalraditya068@gmail.com">
-                <input type="hidden" id="input-hidden-final-photo" name="final_photo">
-                <button id="btn-simpan" name="tombol_simpan" type="button" class="flex items-center justify-center w-12 h-12 bg-blue-900 text-white rounded-full hover:scale-110 transition-transform shadow-xl">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                </button>
-            </form>
+        <!-- Section Email + Rating (hidden by default) -->
+        <div id="section-detail" class="hidden absolute inset-0 flex flex-col items-center justify-center gap-6 p-10">
+            <h2 class="text-2xl font-bold text-blue-900 font-montserrat">Hampir Selesai!</h2>
+            <p class="text-queaternary font-montserrat">Masukkan email untuk menerima foto kamu</p>
+            
+            <input 
+                type="email" 
+                id="email" 
+                name="email"
+                autocomplete="off"
+                placeholder="Email kamu..."
+                class="w-full max-w-sm px-5 py-3 rounded-full border-2 border-blue-900/30 focus:border-blue-900 outline-none font-montserrat text-center"
+            >
+
+            <!-- Rating -->
+            <div class="flex flex-col items-center gap-2">
+                <p class="font-montserrat text-queaternary">Bagaimana pengalaman kamu?</p>
+                <div class="flex gap-3" id="rating-stars">
+                    @for ($i = 1; $i <= 5; $i++)
+                    <button type="button" data-star="{{ $i }}" onclick="setRating({{ $i }})"
+                    class="star-btn text-4xl transition-colors cursor-pointer"
+                    style="color: #D1D5DB">★</button>
+                    @endfor
+                </div>
+                <input type="hidden" id="input-rating" value="0">
+            </div>
+
+            <button 
+                id="btn-final-submit"
+                type="button"
+                class="mt-4 px-10 py-3 bg-blue-900 text-white font-montserrat font-bold rounded-full hover:scale-105 transition-transform shadow-xl"
+            >
+                Simpan & Selesai →
+            </button>
         </div>
     </section>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -80,6 +116,14 @@
         const selectedFrameIdInput = document.getElementById('selectedFrameId');
         const btnNext = document.getElementById('btnNext');
         const btnPrev = document.getElementById('btnPrev');
+
+        function setRating(value) {
+            document.getElementById('input-rating').value = value;
+            document.querySelectorAll('.star-btn').forEach(btn => {
+                const star = parseInt(btn.dataset.star);
+                btn.style.color = star <= value ? '#FBBF24' : '#D1D5DB';
+            });
+        }
 
         function updateFrame(index) {
             displayFrame.src = `/assets/img/frames/${frames[index].image}`;
@@ -102,7 +146,26 @@
             updateFrame(currentIndex);
         });
 
-        document.getElementById('btn-simpan').addEventListener('click', async function() {
+        document.getElementById('btn-simpan').addEventListener('click', function() {
+            document.getElementById('selectFrame').classList.add('hidden');
+
+            document.getElementById('section-detail').classList.remove('hidden');
+        });
+
+        document.getElementById('btn-final-submit').addEventListener('click', async function() {
+            const email = document.getElementById('email').value;
+            const rating = document.getElementById('input-rating').value;
+
+            if (!email) {
+                Swal.fire({ icon: 'warning', title: 'Email kosong', text: 'Masukkan email kamu dulu ya!' });
+                return;
+            }
+
+            if (rating == 0) {
+                Swal.fire({ icon: 'warning', title: 'Rating belum diisi', text: 'Kasih bintang dulu ya!' });
+                return;
+            }
+
             const arrayFotoUser = [
                 "https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/{{ $photos[0] }}",
                 "https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/{{ $photos[1] }}",
@@ -115,15 +178,15 @@
 
             if (hasilGabungan) {
                 document.getElementById('input-hidden-final-photo').value = hasilGabungan;
-                await uploadKeSupabase(hasilGabungan, '{{ $order->order_id }}');
+                await uploadKeSupabase(hasilGabungan, '{{ $order->order_id }}', email, rating);
             }
         });
 
-        async function uploadKeSupabase(base64Data, orderId) {
+        async function uploadKeSupabase(base64Data, orderId, email, rating) {
             try {
                 Swal.fire({
                     title: 'Menyimpan Foto Final...',
-                    html: 'Sedang memproses dan mengunggah hasil akhir ke Supabase.<br>Mohon tunggu sebentar.',
+                    html: 'Sedang memproses hasil akhir<br>Mohon tunggu sebentar.',
                     allowOutsideClick: false,
                     allowEscapeKey: false,
                     didOpen: () => {
@@ -131,7 +194,7 @@
                     }
                 });
 
-                const namaFile = `${orderId}/final_${orderId}.jpg`;
+                const namaFile = `photos/${orderId}/final_${orderId}.jpg`;
                 
                 const responseGambar = await fetch(base64Data);
                 const blobGambar = await responseGambar.blob();
@@ -157,7 +220,6 @@
                     .getPublicUrl(namaFile);
                 
                 const fileUrl = publicUrlData.publicUrl;
-                const emailPelanggan = document.getElementById('email').value;
 
                 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
 
@@ -169,7 +231,8 @@
                     },
                     body: JSON.stringify({
                         image_url: fileUrl,
-                        email: emailPelanggan
+                        email: email,
+                        rating: rating
                     })
                 });
 

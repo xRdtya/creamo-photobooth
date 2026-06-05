@@ -102,6 +102,14 @@ class PhotoSessionController extends Controller
                     'message' => "Gagal: Session untuk transaksi ID {$transaction->id} tidak ditemukan!"
                 ], 404);
             }
+
+            if ($request->rating) {
+                \App\Models\Review::create([
+                    'merchant_id' => \Illuminate\Support\Facades\Auth::guard('merchant')->id(),
+                    'email'       => $request->email,
+                    'rating'      => $request->rating,
+                ]);
+            }
     
             $session->kode_download = $request->image_url;
             $session->save();

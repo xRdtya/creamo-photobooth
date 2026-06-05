@@ -52,6 +52,12 @@ class TransactionController extends Controller
 
     public function notificationHandler(Request $request)
     {
+        $orderId = $request->input('order_id');
+
+        if (!str_starts_with($orderId, 'CRM-')) {
+            return response('Skipped', 200);
+        }
+
         $serverKey = config('midtrans.serverKey');
 
         $signature = hash(

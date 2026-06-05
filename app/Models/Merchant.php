@@ -21,4 +21,18 @@ class Merchant extends Authenticatable
     protected $hidden = [
         'password',
     ];
+
+    public function subscription()
+    {
+        return $this->hasOne(\App\Models\Subscription::class, 'merchant_id', 'id');
+    }
+
+    public function hasActiveSubscription(): bool
+    {
+        $this->refresh();
+        
+        return $this->subscription === 'active'
+            && $this->expiry_date !== null
+            && \Carbon\Carbon::parse($this->expiry_date)->isFuture();
+    }
 }

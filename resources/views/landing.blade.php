@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite('resources/css/app.css')
     <title>CREAMO | Create a Moment</title>
     <link rel="shortcut icon" href="assets/img/logo.svg" type="image/x-icon">
@@ -27,7 +28,7 @@
                 @endguest
                 @auth('merchant')
                 <li class="flex justify-center overflow-hidden w-12 h-12 rounded-full bg-queaternary border-0">
-                    <a href="{{ ($merchant?->subscription == 'active') ? '/dashboard' : '#subs' }}" class="flex border-0 p-0 m-0">
+                    <a href="{{ ($status && $status->status == 'active') ? '/dashboard' : '#subs' }}" class="flex border-0 p-0 m-0">
                         <svg class="w-12 h-12 mt-2 -mb-2 text-secondary" fill="var(--color-secondary)" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                             <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
                         </svg>
@@ -109,12 +110,29 @@
                             </div>
                         </div>
                         <div class="flex justify-center items-center">
-                            <button class="bg-queaternary px-10 h-20 flex text-tertiary font-montserrat font-bold text-2xl rounded-2xl items-center">
-                                Berlangganan Sekarang! &nbsp;
-                                <svg class="w-6 h-6 text-tertiary" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
-                                </svg>
-                            </button>
+                            @guest('merchant')
+                                <a href="/signin" class="bg-queaternary px-10 h-20 flex text-tertiary font-montserrat font-bold text-2xl rounded-2xl items-center">
+                                    Berlangganan Sekarang! &nbsp;
+                                </a>
+                            @endguest
+                            @auth('merchant')
+                                @if($status && $status->status == 'active')
+                                <a href="/dashboard" class="bg-queaternary px-10 h-20 flex text-tertiary font-montserrat font-bold text-2xl rounded-2xl items-center">
+                                    Anda Telah Berlangganan! &nbsp;
+                                </a>
+                                @else
+                                <form id="subscribeForm">
+                                    @csrf
+                                    <input type="hidden" name="plan" id="selectedPlan" value="monthly">
+                                    <button type="button" onclick="subscribe()" class="bg-queaternary px-10 h-20 flex text-tertiary font-montserrat font-bold text-2xl rounded-2xl items-center">
+                                        Berlangganan Sekarang! &nbsp;
+                                        <svg class="w-6 h-6 text-tertiary" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+                                        </svg>
+                                    </button>
+                                </form>
+                            @endif
+                            @endauth
                         </div>
                     </div>
                 </div>
@@ -140,5 +158,41 @@
                 <small class="font-montserrat text-primary font-extralight bottom-3 left-12 absolute">&copy; 2026 Creamo, All rights reserved.</small>
             </div>
         </footer>
+        <script src="https://app.sandbox.midtrans.com/snap/snap.js"
+        data-client-key="{{ config('midtrans.clientKey') }}"></script>
+        <script>
+        function subscribe() {
+            fetch('/subscription/checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({ plan: document.getElementById('selectedPlan').value })
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log('Response:', data);
+                
+                if (!data.snap_token) {
+                    alert('Gagal mendapat token: ' + JSON.stringify(data));
+                    return;
+                }
+                
+                snap.pay(data.snap_token, {
+                    onSuccess: function(result) {
+                        window.location.href = '/';
+                    },
+                    onPending: function(result) {
+                        alert('Pembayaran pending, harap selesaikan.');
+                    },
+                    onError: function(result) {
+                        alert('Pembayaran gagal.');
+                    },
+                });
+            })
+            .catch(err => console.error('Fetch error:', err));
+        }
+        </script>
     </body>
 </html>

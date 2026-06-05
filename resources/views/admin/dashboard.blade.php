@@ -664,7 +664,7 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Nama</th>
+                            <th>#</th>
                             <th>Rating</th>
                             <th>Tanggal</th>
                             <th>Email</th>
@@ -673,7 +673,7 @@
                     <tbody>
                         @forelse($reviews as $review)
                         <tr>
-                            <td style="font-weight:600;">{{ $review->customer_name }}</td>
+                            <td style="font-weight:600;">{{ $loop->iteration }}</td>
                             <td>
                                 <span class="stars">
                                     @for($s = 1; $s <= 5; $s++)
@@ -903,7 +903,6 @@
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>Nama</th>
                             <th>Email</th>
                             <th>Rating</th>
                             <th>Tanggal</th>
@@ -913,7 +912,6 @@
                         @forelse($reviews as $i => $review)
                         <tr>
                             <td style="color:var(--muted);font-weight:600;">{{ $i+1 }}</td>
-                            <td style="font-weight:700;">{{ $review->customer_name }}</td>
                             <td>{{ $review->email ?? '-' }}</td>
                             <td>
                                 <span class="stars">
