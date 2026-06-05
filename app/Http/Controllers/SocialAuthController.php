@@ -76,6 +76,8 @@ class SocialAuthController extends Controller
             return redirect('/')->with('success', 'Selamat datang, ' . $merchant->business_name . '!');
 
         } catch (\Exception $e) {
+            \Log::error('Google OAuth Error: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
             return redirect('/signin')->with('error', 'Login dengan Google gagal: ' . $e->getMessage());
         }
     }
