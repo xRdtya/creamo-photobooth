@@ -13,7 +13,7 @@ class AdminDashboardController extends Controller
 {
     public function index()
     {
-        $merchant = Auth::guard('merchant')->user();
+        $merchant   = Auth::guard('merchant')->user();
         $merchantId = $merchant->id;
 
         $today         = Carbon::today();
@@ -21,71 +21,95 @@ class AdminDashboardController extends Controller
         $endOfWeek     = Carbon::now()->endOfWeek();
         $lastWeekStart = Carbon::now()->subWeek()->startOfWeek();
         $lastWeekEnd   = Carbon::now()->subWeek()->endOfWeek();
-        $thirtyDaysAgo = Carbon::today()->subDays(29);
+        $lastMonthStart = Carbon::now()->subMonth()->startOfMonth();
+        $thisMonthStart = Carbon::now()->startOfMonth();
 
-        $allTransactions    = Transaction::where('merchant_id', $merchantId)
-            ->where('created_at', '>=', $thirtyDaysAgo)->get();
-        $successTransactions = $allTransactions->where('payment_status', 'success');
+        // ── 1. WEEKLY + CUSTOMER STATS (1 query) ─────────────────────────
+        $stats = Transaction::where('merchant_id', $merchantId)
+            ->selectRaw("
+            SUM(CASE WHEN payment_status = 'success' AND created_at BETWEEN ? AND ? THEN gross_amount ELSE 0 END) as revenue_this_week,
+            SUM(CASE WHEN payment_status = 'success' AND created_at BETWEEN ? AND ? THEN gross_amount ELSE 0 END) as revenue_last_week,
+            COUNT(CASE WHEN created_at BETWEEN ? AND ? THEN 1 END) as orders_this_week,
+            COUNT(CASE WHEN created_at BETWEEN ? AND ? THEN 1 END) as orders_last_week,
+            COUNT(CASE WHEN payment_status = 'success' THEN 1 END) as total_customers,
+            COUNT(CASE WHEN payment_status = 'success' AND created_at BETWEEN ? AND ? THEN 1 END) as customers_last_month
+        ", [
+                $startOfWeek,
+                $endOfWeek,
+                $lastWeekStart,
+                $lastWeekEnd,
+                $startOfWeek,
+                $endOfWeek,
+                $lastWeekStart,
+                $lastWeekEnd,
+                $lastMonthStart,
+                $thisMonthStart,
+            ])->first();
 
-        $revenueThisWeek = $successTransactions
-            ->whereBetween('created_at', [$startOfWeek, $endOfWeek])->sum('gross_amount');
-        $revenueLastWeek = $successTransactions
-            ->whereBetween('created_at', [$lastWeekStart, $lastWeekEnd])->sum('gross_amount');
+        $revenueThisWeek     = $stats->revenue_this_week ?? 0;
+        $revenueLastWeek     = $stats->revenue_last_week ?? 0;
+        $totalOrdersThisWeek = $stats->orders_this_week ?? 0;
+        $totalOrdersLastWeek = $stats->orders_last_week ?? 0;
+        $totalCustomers      = $stats->total_customers ?? 0;
+        $totalCustomersLastMonth = $stats->customers_last_month ?? 0;
+
         $revenueChangePercent = $revenueLastWeek > 0
             ? round((($revenueThisWeek - $revenueLastWeek) / $revenueLastWeek) * 100, 1)
             : ($revenueThisWeek > 0 ? 100 : 0);
 
-        $totalOrdersThisWeek = $allTransactions
-            ->whereBetween('created_at', [$startOfWeek, $endOfWeek])->count();
-        $totalOrdersLastWeek = $allTransactions
-            ->whereBetween('created_at', [$lastWeekStart, $lastWeekEnd])->count();
         $ordersChangePercent = $totalOrdersLastWeek > 0
             ? round((($totalOrdersThisWeek - $totalOrdersLastWeek) / $totalOrdersLastWeek) * 100, 1)
             : 0;
 
-        $totalCustomers = Transaction::where('merchant_id', $merchantId)
-            ->where('payment_status', 'success')->count();
-        $totalCustomersLastMonth = Transaction::where('merchant_id', $merchantId)
-            ->where('payment_status', 'success')
-            ->whereBetween('created_at', [
-                Carbon::now()->subMonth()->startOfMonth(),
-                Carbon::now()->startOfMonth()
-            ])->count();
         $customerGrowth = $totalCustomersLastMonth > 0
             ? round((($totalCustomers - $totalCustomersLastMonth) / $totalCustomersLastMonth) * 100, 1)
             : 0;
 
-        $photoBase = PhotoSession::whereHas(
-            'transaction',
-            fn($q) =>
-            $q->where('merchant_id', $merchantId)
-        );
-        $totalPhotosToday     = (clone $photoBase)->whereDate('created_at', $today)->count();
-        $totalPhotosYesterday = (clone $photoBase)->whereDate('created_at', Carbon::yesterday())->count();
+        // ── 2. PHOTOS TODAY & YESTERDAY (1 query) ────────────────────────
+        $photoStats = PhotoSession::join('transactions', 'photo_sessions.transaction_id', '=', 'transactions.id')
+            ->where('transactions.merchant_id', $merchantId)
+            ->selectRaw("
+            COUNT(CASE WHEN DATE(photo_sessions.created_at) = ? THEN 1 END) as today,
+            COUNT(CASE WHEN DATE(photo_sessions.created_at) = ? THEN 1 END) as yesterday
+        ", [
+                $today->toDateString(),
+                Carbon::yesterday()->toDateString(),
+            ])->first();
+
+        $totalPhotosToday     = $photoStats->today ?? 0;
+        $totalPhotosYesterday = $photoStats->yesterday ?? 0;
+
         $photoGrowth = $totalPhotosYesterday > 0
             ? round((($totalPhotosToday - $totalPhotosYesterday) / $totalPhotosYesterday) * 100, 1)
             : 0;
 
+        // ── 3. RECENT TRANSACTIONS (1 query) ─────────────────────────────
         $transactions = Transaction::with('photoSessions')
             ->where('merchant_id', $merchantId)
             ->orderBy('created_at', 'desc')
-            ->take(10)->get();
+            ->take(10)
+            ->get();
 
+        // ── 4. REVIEWS (1 query) ──────────────────────────────────────────
         $reviews = Review::where('merchant_id', $merchantId)
             ->orderBy('created_at', 'desc')
-            ->take(10)->get();
+            ->take(10)
+            ->get();
 
+        // ── 5. ACTIVE DEVICES (1 query) ───────────────────────────────────
         $activeDevices = PhotoSession::whereRaw('"is_active" = true')
             ->whereRaw('"last_ping_at" >= ?', [now()->subMinutes(5)])
             ->whereHas('transaction', fn($q) => $q->where('merchant_id', $merchantId))
             ->with(['transaction:id,order_id,merchant_id,created_at'])
-            ->orderBy('last_ping_at', 'desc')->get();
+            ->orderBy('last_ping_at', 'desc')
+            ->get();
+
         $activeDeviceCount = $activeDevices->count();
 
-        // Chart di-load via AJAX
-        $revenueChart = [];
+        // ── Chart di-load via AJAX ────────────────────────────────────────
+        $revenueChart         = [];
         $revenueChartLastWeek = [];
-        $monthlyStats = [];
+        $monthlyStats         = [];
 
         return view('admin.dashboard', compact(
             'merchant',
