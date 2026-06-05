@@ -11,10 +11,8 @@ return new class extends Migration
         Schema::create('reviews', function (Blueprint $table) {
             $table->id();
             $table->foreignId('merchant_id')->constrained('merchants')->cascadeOnDelete();
-            $table->string('customer_name');
             $table->string('email')->nullable();
-            $table->tinyInteger('rating')->default(5); // 1-5 stars
-            $table->text('comment')->nullable();
+            $table->tinyInteger('rating')->default(5);
             $table->timestamps();
         });
     }
