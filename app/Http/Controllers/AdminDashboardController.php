@@ -105,7 +105,8 @@ class AdminDashboardController extends Controller
 
         // ── Active Devices ────────────────────────────────────────────────
         // Device dianggap aktif jika is_active=true dan last_ping_at dalam 5 menit
-        $activeDevices = PhotoSession::active()
+        $activeDevices = PhotoSession::whereRaw('"is_active" = true')
+            ->whereRaw('"last_ping_at" >= ?', [now()->subMinutes(5)])
             ->whereHas('transaction', fn($q) => $q->where('merchant_id', $merchant->id))
             ->with(['transaction:id,order_id,merchant_id,created_at'])
             ->orderBy('last_ping_at', 'desc')
