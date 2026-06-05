@@ -157,19 +157,27 @@ class PhotoSessionController extends Controller
     {
         try {
             $transaction = Transaction::where('order_id', $orderId)->firstOrFail();
-
             $session = PhotoSession::where('transaction_id', $transaction->id)->firstOrFail();
 
             $path = $session->kode_download;
 
-            if ($path && Storage::disk('s3')->exists($path)) {
-
-                $customFileName = 'Creamo_' . $orderId . '.png';
-
-                return Storage::disk('s3')->download($path, $customFileName);
+            if (!$path) {
+                return redirect()->back()->withErrors(['error' => 'File foto tidak ditemukan.']);
             }
 
-            return redirect()->back()->withErrors(['error' => 'File foto tidak ditemukan di server.']);
+            if (str_starts_with($path, 'http')) {
+                return redirect($path);
+            }
+
+            $publicUrl = 'https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/' . $path;
+
+            return response()->stream(function () use ($publicUrl) {
+                $content = file_get_contents($publicUrl);
+                echo $content;
+            }, 200, [
+                'Content-Type'        => 'image/png',
+                'Content-Disposition' => 'attachment; filename="Creamo_' . $orderId . '.png"',
+            ]);
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['error' => 'Gagal mendownload: ' . $e->getMessage()]);
         }

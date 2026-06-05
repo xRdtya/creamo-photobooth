@@ -23,7 +23,7 @@ class SubscriptionController extends Controller
         $merchant = Auth::guard('merchant')->user();
 
         $plans = [
-            'monthly' => ['label' => 'Bulanan', 'price' => 99000],
+            'monthly' => ['label' => 'Bulanan', 'price' => 499000],
             'yearly'  => ['label' => 'Tahunan', 'price' => 899000],
         ];
 
