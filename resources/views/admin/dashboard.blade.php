@@ -999,113 +999,127 @@
 
 
 <script>
-// ── Data from PHP ──────────────────────────────────────────
-const revenueData = @json($revenueChart);
-const monthlyData = @json($monthlyStats);
+let revenueData = [];
+let monthlyData = [];
+
+let revChart = null;
+let monthlyChart = null;
+
+fetch('/dashboard/chart-data')
+    .then(r => r.json())
+    .then(data => {
+        revenueData = data.revenueChart;
+        monthlyData = data.monthlyStats;
+        renderRevenueChart();
+        renderMonthlyChart();
+    });
 
 // ── Revenue Chart ──────────────────────────────────────────
-const revCtx = document.getElementById('revenueChart').getContext('2d');
-new Chart(revCtx, {
-    type: 'bar',
-    data: {
-        labels: revenueData.map(d => d.label),
-        datasets: [
-            {
-                label: 'This Week',
-                data: revenueData.map(d => d.value),
-                backgroundColor: '#3b4b86',
-                borderRadius: 6,
-                barPercentage: 0.5,
-            },
-            {
-                label: 'Last Week',
-                data: revenueData.map(d => d.value),
-                backgroundColor: '#cbd5e1',
-                borderRadius: 6,
-                barPercentage: 0.5,
+function renderRevenueChart() {
+    const revCtx = document.getElementById('revenueChart').getContext('2d');
+    new Chart(revCtx, {
+        type: 'bar',
+        data: {
+            labels: revenueData.map(d => d.label),
+            datasets: [
+                {
+                    label: 'This Week',
+                    data: revenueData.map(d => d.value),
+                    backgroundColor: '#3b4b86',
+                    borderRadius: 6,
+                    barPercentage: 0.5,
+                },
+                {
+                    label: 'Last Week',
+                    data: revenueData.map(d => d.value),
+                    backgroundColor: '#cbd5e1',
+                    borderRadius: 6,
+                    barPercentage: 0.5,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: {
+                callbacks: {
+                    label: ctx => 'IDR ' + ctx.raw.toLocaleString('id-ID')
+                }
+            }},
+            scales: {
+                x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+                y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 11 }, callback: v => 'IDR ' + (v/1000).toFixed(0) + 'k' } }
             }
-        ]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false }, tooltip: {
-            callbacks: {
-                label: ctx => 'IDR ' + ctx.raw.toLocaleString('id-ID')
-            }
-        }},
-        scales: {
-            x: { grid: { display: false }, ticks: { font: { size: 11 } } },
-            y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 11 }, callback: v => 'IDR ' + (v/1000).toFixed(0) + 'k' } }
         }
-    }
-});
-
+    });
+}
 
 // ── Monthly Statistics Chart ───────────────────────────────
-const mCtx = document.getElementById('monthlyChart').getContext('2d');
-new Chart(mCtx, {
-    type: 'line',
-    data: {
-        labels: monthlyData.map(d => d.date),
-        datasets: [
-            {
-                label: 'Revenue (IDR)',
-                data: monthlyData.map(d => d.revenue),
-                borderColor: '#3b4b86',
-                backgroundColor: 'rgba(59,75,134,0.1)',
-                fill: true,
-                tension: 0.4,
-                borderWidth: 2.5,
-                pointRadius: 2,
-                yAxisID: 'yRev',
+function renderMonthlyChart() {
+    const mCtx = document.getElementById('monthlyChart').getContext('2d');
+    new Chart(mCtx, {
+        type: 'line',
+        data: {
+            labels: monthlyData.map(d => d.date),
+            datasets: [
+                {
+                    label: 'Revenue (IDR)',
+                    data: monthlyData.map(d => d.revenue),
+                    borderColor: '#3b4b86',
+                    backgroundColor: 'rgba(59,75,134,0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 2.5,
+                    pointRadius: 2,
+                    yAxisID: 'yRev',
+                },
+                {
+                    label: 'Orders',
+                    data: monthlyData.map(d => d.orders),
+                    borderColor: '#22c55e',
+                    backgroundColor: 'rgba(34,197,94,0.07)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 2,
+                    pointRadius: 2,
+                    yAxisID: 'yOrd',
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: { usePointStyle: true, font: { size: 12 } }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ctx.dataset.label === 'Revenue (IDR)'
+                            ? 'IDR ' + ctx.raw.toLocaleString('id-ID')
+                            : ctx.raw + ' orders'
+                    }
+                }
             },
-            {
-                label: 'Orders',
-                data: monthlyData.map(d => d.orders),
-                borderColor: '#22c55e',
-                backgroundColor: 'rgba(34,197,94,0.07)',
-                fill: true,
-                tension: 0.4,
-                borderWidth: 2,
-                pointRadius: 2,
-                yAxisID: 'yOrd',
-            }
-        ]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: { mode: 'index', intersect: false },
-        plugins: {
-            legend: {
-                display: true,
-                position: 'top',
-                labels: { usePointStyle: true, font: { size: 12 } }
-            },
-            tooltip: {
-                callbacks: {
-                    label: ctx => ctx.dataset.label === 'Revenue (IDR)'
-                        ? 'IDR ' + ctx.raw.toLocaleString('id-ID')
-                        : ctx.raw + ' orders'
+            scales: {
+                x: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 }, maxTicksLimit: 15 } },
+                yRev: {
+                    position: 'left',
+                    grid: { color: '#f1f5f9' },
+                    ticks: { font: { size: 10 }, callback: v => 'IDR ' + (v/1000).toFixed(0) + 'k' }
+                },
+                yOrd: {
+                    position: 'right',
+                    grid: { drawOnChartArea: false },
+                    ticks: { font: { size: 10 }, stepSize: 1 }
                 }
             }
-        },
-        scales: {
-            x: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 }, maxTicksLimit: 15 } },
-            yRev: {
-                position: 'left',
-                grid: { color: '#f1f5f9' },
-                ticks: { font: { size: 10 }, callback: v => 'IDR ' + (v/1000).toFixed(0) + 'k' }
-            },
-            yOrd: {
-                position: 'right',
-                grid: { drawOnChartArea: false },
-                ticks: { font: { size: 10 }, stepSize: 1 }
-            }
         }
-    }
-});
+    });
+}
 </script>
 
 <script>
