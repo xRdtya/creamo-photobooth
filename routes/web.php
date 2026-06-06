@@ -58,6 +58,10 @@ Route::middleware(['auth:merchant', CheckMerchantSubscription::class])->group(fu
     Route::get('/dashboard/stats', [AdminDashboardController::class, 'stats'])->name('dashboard.stats');
     Route::get('/dashboard/chart-data', [AdminDashboardController::class, 'chartData'])->name('dashboard.chart-data');
     Route::get('/dashboard/active-devices', [AdminDashboardController::class, 'activeDevices'])->name('dashboard.active-devices');
+    Route::post('/dashboard/change-password', [AdminDashboardController::class, 'changePassword'])->name('dashboard.change-password');
+    Route::post('/dashboard/set-password', [AdminDashboardController::class, 'setPassword'])->name('dashboard.set-password');
+    Route::post('/dashboard/withdraw', [AdminDashboardController::class, 'requestWithdraw'])->name('dashboard.withdraw');
+    Route::get('/dashboard/withdrawals', [AdminDashboardController::class, 'withdrawHistory'])->name('dashboard.withdrawals');
 
     Route::get('/photo', function() {
         return view("Customer.frontPage");
