@@ -24,14 +24,14 @@ class AdminDashboardController extends Controller
             ->orderBy('created_at', 'desc')
             ->take(10)
             ->get();
-        \Log::info('transactions: ' . round((microtime(true) - $t1) * 1000) . 'ms');
+        error_log('transactions: ' . round((microtime(true) - $t1) * 1000) . 'ms');
 
         $t2 = microtime(true);
         $reviews = Review::where('merchant_id', $merchantId)
             ->orderBy('created_at', 'desc')
             ->take(10)
             ->get();
-        \Log::info('reviews: ' . round((microtime(true) - $t2) * 1000) . 'ms');
+        error_log('reviews: ' . round((microtime(true) - $t2) * 1000) . 'ms');
 
         $t3 = microtime(true);
         $activeDevices = PhotoSession::join('transactions', 'photo_sessions.transaction_id', '=', 'transactions.id')
@@ -47,9 +47,9 @@ class AdminDashboardController extends Controller
             ->get();
 
         $activeDeviceCount = $activeDevices->count();
-        \Log::info('activeDevices: ' . round((microtime(true) - $t3) * 1000) . 'ms');
+        error_log('activeDevices: ' . round((microtime(true) - $t3) * 1000) . 'ms');
 
-        \Log::info('TOTAL index: ' . round((microtime(true)-$start)*1000) . 'ms');
+        error_log('TOTAL: ' . round((microtime(true) - $start) * 1000) . 'ms');
 
         return view('admin.dashboard', compact('merchant', 'transactions', 'reviews', 'activeDeviceCount'));
     }
