@@ -18,9 +18,8 @@ class AdminDashboardController extends Controller
         $merchantId   = $merchant->id;
 
         $t1 = microtime(true);
-        $transactions = Transaction::with(['photoSessions:id,transaction_id,kode_download,status_cetak'])
-            ->where('merchant_id', $merchantId)
-            ->select('id', 'order_id', 'customer_name', 'email', 'gross_amount', 'payment_status', 'created_at')
+        $transactions = Transaction::where('merchant_id', $merchantId)
+            ->select('id', 'order_id', 'customer_name', 'email', 'phone_number', 'gross_amount', 'payment_status', 'created_at')
             ->orderBy('created_at', 'desc')
             ->take(10)
             ->get();
