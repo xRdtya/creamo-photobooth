@@ -574,8 +574,14 @@
                 </div>
                 <a href="#" class="btn-outline" onclick="openPanel('panelRevenue');return false;">View Report</a>
             </div>
-            <div class="chart-wrap">
-                <canvas id="revenueChart"></canvas>
+            <div class="chart-wrap" style="position:relative;">
+                <!-- Skeleton bars -->
+                <div id="skeleton-revenue-chart" style="display:flex;align-items:flex-end;gap:8px;height:130px;padding:10px 0;">
+                    @foreach([60,80,45,90,70,55,85] as $h)
+                    <div style="flex:1;height:{{$h}}%;background:#e2e8f0;border-radius:6px;animation:pulse 1.5s infinite;"></div>
+                    @endforeach
+                </div>
+                <canvas id="revenueChart" style="display:none;"></canvas>
             </div>
             <div style="display:flex;gap:20px;margin-top:10px;">
                 <span style="font-size:11px;font-weight:600;color:var(--accent);"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--accent);margin-right:4px;"></span>This week</span>
@@ -712,8 +718,13 @@
                 </div>
                 <a href="#" class="btn-outline" onclick="openPanel('panelStatistics');return false;">View All</a>
             </div>
-            <div class="chart-wrap-lg">
-                <canvas id="monthlyChart"></canvas>
+            <div class="chart-wrap-lg" style="position:relative;">
+                <div id="skeleton-monthly-chart" style="display:flex;align-items:flex-end;gap:4px;height:220px;padding:10px 0;">
+                    @foreach([40,60,35,80,55,70,45,90,65,75,50,85,40,60,70,55,80,45,65,90,35,75,60,50,85,40,70,55,80,65] as $h)
+                    <div style="flex:1;height:{{$h}}%;background:#e2e8f0;border-radius:4px;animation:pulse 1.5s infinite;"></div>
+                    @endforeach
+                </div>
+                <canvas id="monthlyChart" style="display:none;"></canvas>
             </div>
         </div>
     </div>
@@ -1086,7 +1097,11 @@ fetch('/dashboard/chart-data')
 
 // ── Revenue Chart ──────────────────────────────────────────
 function renderRevenueChart() {
+    document.getElementById('skeleton-revenue-chart').style.display = 'none';
+    document.getElementById('revenueChart').style.display = 'block';
+
     const revCtx = document.getElementById('revenueChart').getContext('2d');
+    if (revChart) revChart.destroy();
     new Chart(revCtx, {
         type: 'bar',
         data: {
@@ -1126,7 +1141,11 @@ function renderRevenueChart() {
 
 // ── Monthly Statistics Chart ───────────────────────────────
 function renderMonthlyChart() {
+    document.getElementById('skeleton-monthly-chart').style.display = 'none';
+    document.getElementById('monthlyChart').style.display = 'block';
+
     const mCtx = document.getElementById('monthlyChart').getContext('2d');
+    if (monthlyChart) monthlyChart.destroy();
     new Chart(mCtx, {
         type: 'line',
         data: {
