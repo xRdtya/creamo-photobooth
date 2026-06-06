@@ -13,21 +13,27 @@ class AdminDashboardController extends Controller
 {
     public function index()
     {
+        $start = microtime(true);
         $merchant     = Auth::guard('merchant')->user();
         $merchantId   = $merchant->id;
 
+        $t1 = microtime(true);
         $transactions = Transaction::with(['photoSessions:id,transaction_id,kode_download,status_cetak'])
             ->where('merchant_id', $merchantId)
             ->select('id', 'order_id', 'customer_name', 'email', 'gross_amount', 'payment_status', 'created_at')
             ->orderBy('created_at', 'desc')
             ->take(10)
             ->get();
+        \Log::info('transactions: ' . round((microtime(true) - $t1) * 1000) . 'ms');
 
+        $t2 = microtime(true);
         $reviews = Review::where('merchant_id', $merchantId)
             ->orderBy('created_at', 'desc')
             ->take(10)
             ->get();
+        \Log::info('reviews: ' . round((microtime(true) - $t2) * 1000) . 'ms');
 
+        $t3 = microtime(true);
         $activeDevices = PhotoSession::join('transactions', 'photo_sessions.transaction_id', '=', 'transactions.id')
             ->where('transactions.merchant_id', $merchantId)
             ->whereRaw('photo_sessions."is_active" = true')
@@ -41,6 +47,9 @@ class AdminDashboardController extends Controller
             ->get();
 
         $activeDeviceCount = $activeDevices->count();
+        \Log::info('activeDevices: ' . round((microtime(true) - $t3) * 1000) . 'ms');
+
+        \Log::info('TOTAL index: ' . round((microtime(true)-$start)*1000) . 'ms');
 
         return view('admin.dashboard', compact('merchant', 'transactions', 'reviews', 'activeDeviceCount'));
     }
