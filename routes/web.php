@@ -55,6 +55,7 @@ Route::post('/photo/webhook', [TransactionController::class, 'notificationHandle
 // Admin Dashboard
 Route::middleware(['auth:merchant', CheckMerchantSubscription::class])->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/stats', [AdminDashboardController::class, 'stats'])->name('dashboard.stats');
     Route::get('/dashboard/chart-data', [AdminDashboardController::class, 'chartData'])->name('dashboard.chart-data');
     Route::get('/dashboard/active-devices', [AdminDashboardController::class, 'activeDevices'])->name('dashboard.active-devices');
 

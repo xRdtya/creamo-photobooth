@@ -13,18 +13,44 @@ class AdminDashboardController extends Controller
 {
     public function index()
     {
+        $merchant     = Auth::guard('merchant')->user();
+        $merchantId   = $merchant->id;
+
+        $transactions = Transaction::with(['photoSessions:id,transaction_id,kode_download,status_cetak'])
+            ->where('merchant_id', $merchantId)
+            ->select('id', 'order_id', 'customer_name', 'email', 'gross_amount', 'payment_status', 'created_at')
+            ->orderBy('created_at', 'desc')
+            ->take(10)
+            ->get();
+
+        $reviews = Review::where('merchant_id', $merchantId)
+            ->orderBy('created_at', 'desc')
+            ->take(10)
+            ->get();
+
+        $activeDevices = PhotoSession::whereRaw('"is_active" = true')
+            ->whereRaw('"last_ping_at" >= ?', [now()->subMinutes(5)])
+            ->whereHas('transaction', fn($q) => $q->where('merchant_id', $merchantId))
+            ->with(['transaction:id,order_id,merchant_id,created_at'])
+            ->orderBy('last_ping_at', 'desc')
+            ->get();
+
+        return view('admin.dashboard', compact('merchant', 'transactions', 'reviews', 'activeDevices'));
+    }
+
+    public function stats()
+    {
         $merchant   = Auth::guard('merchant')->user();
         $merchantId = $merchant->id;
 
-        $today         = Carbon::today();
-        $startOfWeek   = Carbon::now()->startOfWeek();
-        $endOfWeek     = Carbon::now()->endOfWeek();
-        $lastWeekStart = Carbon::now()->subWeek()->startOfWeek();
-        $lastWeekEnd   = Carbon::now()->subWeek()->endOfWeek();
+        $today          = Carbon::today();
+        $startOfWeek    = Carbon::now()->startOfWeek();
+        $endOfWeek      = Carbon::now()->endOfWeek();
+        $lastWeekStart  = Carbon::now()->subWeek()->startOfWeek();
+        $lastWeekEnd    = Carbon::now()->subWeek()->endOfWeek();
         $lastMonthStart = Carbon::now()->subMonth()->startOfMonth();
         $thisMonthStart = Carbon::now()->startOfMonth();
 
-        // ── 1. WEEKLY + CUSTOMER STATS (1 query) ─────────────────────────
         $stats = Transaction::where('merchant_id', $merchantId)
             ->selectRaw("
             SUM(CASE WHEN payment_status = 'success' AND created_at BETWEEN ? AND ? THEN gross_amount ELSE 0 END) as revenue_this_week,
@@ -46,91 +72,41 @@ class AdminDashboardController extends Controller
                 $thisMonthStart,
             ])->first();
 
+        $photoStats = PhotoSession::join('transactions', 'photo_sessions.transaction_id', '=', 'transactions.id')
+            ->where('transactions.merchant_id', $merchantId)
+            ->selectRaw("
+            COUNT(CASE WHEN DATE(photo_sessions.created_at) = ? THEN 1 END) as today,
+            COUNT(CASE WHEN DATE(photo_sessions.created_at) = ? THEN 1 END) as yesterday
+        ", [$today->toDateString(), Carbon::yesterday()->toDateString()])
+            ->first();
+
         $revenueThisWeek     = $stats->revenue_this_week ?? 0;
         $revenueLastWeek     = $stats->revenue_last_week ?? 0;
         $totalOrdersThisWeek = $stats->orders_this_week ?? 0;
         $totalOrdersLastWeek = $stats->orders_last_week ?? 0;
         $totalCustomers      = $stats->total_customers ?? 0;
         $totalCustomersLastMonth = $stats->customers_last_month ?? 0;
-
-        $revenueChangePercent = $revenueLastWeek > 0
-            ? round((($revenueThisWeek - $revenueLastWeek) / $revenueLastWeek) * 100, 1)
-            : ($revenueThisWeek > 0 ? 100 : 0);
-
-        $ordersChangePercent = $totalOrdersLastWeek > 0
-            ? round((($totalOrdersThisWeek - $totalOrdersLastWeek) / $totalOrdersLastWeek) * 100, 1)
-            : 0;
-
-        $customerGrowth = $totalCustomersLastMonth > 0
-            ? round((($totalCustomers - $totalCustomersLastMonth) / $totalCustomersLastMonth) * 100, 1)
-            : 0;
-
-        // ── 2. PHOTOS TODAY & YESTERDAY (1 query) ────────────────────────
-        $photoStats = PhotoSession::join('transactions', 'photo_sessions.transaction_id', '=', 'transactions.id')
-            ->where('transactions.merchant_id', $merchantId)
-            ->selectRaw("
-            COUNT(CASE WHEN DATE(photo_sessions.created_at) = ? THEN 1 END) as today,
-            COUNT(CASE WHEN DATE(photo_sessions.created_at) = ? THEN 1 END) as yesterday
-        ", [
-                $today->toDateString(),
-                Carbon::yesterday()->toDateString(),
-            ])->first();
-
-        $totalPhotosToday     = $photoStats->today ?? 0;
+        $totalPhotosToday    = $photoStats->today ?? 0;
         $totalPhotosYesterday = $photoStats->yesterday ?? 0;
 
-        $photoGrowth = $totalPhotosYesterday > 0
-            ? round((($totalPhotosToday - $totalPhotosYesterday) / $totalPhotosYesterday) * 100, 1)
-            : 0;
-
-        // ── 3. RECENT TRANSACTIONS (1 query) ─────────────────────────────
-        $transactions = Transaction::with(['photoSessions:id,transaction_id,kode_download,status_cetak'])
-            ->where('merchant_id', $merchantId)
-            ->select('id', 'order_id', 'customer_name', 'email', 'gross_amount', 'payment_status', 'created_at')
-            ->orderBy('created_at', 'desc')
-            ->take(10)
-            ->get();
-
-        // ── 4. REVIEWS (1 query) ──────────────────────────────────────────
-        $reviews = Review::where('merchant_id', $merchantId)
-            ->orderBy('created_at', 'desc')
-            ->take(10)
-            ->get();
-
-        // ── 5. ACTIVE DEVICES (1 query) ───────────────────────────────────
-        $activeDevices = PhotoSession::whereRaw('"is_active" = true')
-            ->whereRaw('"last_ping_at" >= ?', [now()->subMinutes(5)])
-            ->whereHas('transaction', fn($q) => $q->where('merchant_id', $merchantId))
-            ->with(['transaction:id,order_id,merchant_id,created_at'])
-            ->orderBy('last_ping_at', 'desc')
-            ->get();
-
-        $activeDeviceCount = $activeDevices->count();
-
-        // ── Chart di-load via AJAX ────────────────────────────────────────
-        $revenueChart         = [];
-        $revenueChartLastWeek = [];
-        $monthlyStats         = [];
-
-        return view('admin.dashboard', compact(
-            'merchant',
-            'revenueThisWeek',
-            'revenueLastWeek',
-            'revenueChangePercent',
-            'revenueChart',
-            'revenueChartLastWeek',
-            'totalCustomers',
-            'customerGrowth',
-            'totalPhotosToday',
-            'photoGrowth',
-            'transactions',
-            'reviews',
-            'monthlyStats',
-            'totalOrdersThisWeek',
-            'ordersChangePercent',
-            'activeDevices',
-            'activeDeviceCount',
-        ));
+        return response()->json([
+            'revenueThisWeek'     => $revenueThisWeek,
+            'revenueChangePercent' => $revenueLastWeek > 0
+                ? round((($revenueThisWeek - $revenueLastWeek) / $revenueLastWeek) * 100, 1)
+                : ($revenueThisWeek > 0 ? 100 : 0),
+            'totalCustomers'      => $totalCustomers,
+            'customerGrowth'      => $totalCustomersLastMonth > 0
+                ? round((($totalCustomers - $totalCustomersLastMonth) / $totalCustomersLastMonth) * 100, 1)
+                : 0,
+            'totalPhotosToday'    => $totalPhotosToday,
+            'photoGrowth'         => $totalPhotosYesterday > 0
+                ? round((($totalPhotosToday - $totalPhotosYesterday) / $totalPhotosYesterday) * 100, 1)
+                : 0,
+            'totalOrdersThisWeek' => $totalOrdersThisWeek,
+            'ordersChangePercent' => $totalOrdersLastWeek > 0
+                ? round((($totalOrdersThisWeek - $totalOrdersLastWeek) / $totalOrdersLastWeek) * 100, 1)
+                : 0,
+        ]);
     }
 
     public function chartData()

@@ -509,6 +509,11 @@
             color: var(--muted); font-size: 14px;
         }
         .panel-empty i { font-size: 42px; margin-bottom: 14px; opacity: .3; display: block; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
     </style>
 </head>
 <body>
@@ -559,12 +564,12 @@
             <div class="card-header">
                 <div>
                     <div class="card-label">Revenue</div>
-                    <div class="card-value">IDR {{ number_format($revenueThisWeek, 0, ',', '.') }}</div>
-                    @if($revenueChangePercent >= 0)
-                        <span class="badge-up"><i class="fas fa-arrow-up"></i> {{ $revenueChangePercent }}% vs last week</span>
-                    @else
-                        <span class="badge-down"><i class="fas fa-arrow-down"></i> {{ abs($revenueChangePercent) }}% vs last week</span>
-                    @endif
+                    <div class="card-value" id="val-revenue">
+                        <span class="skeleton" style="display:inline-block;width:120px;height:24px;border-radius:6px;background:#e2e8f0;animation:pulse 1.5s infinite;"></span>
+                    </div>
+                    <span id="val-revenue-badge" class="badge-up">
+                        <span class="skeleton" style="display:inline-block;width:80px;height:16px;border-radius:4px;background:#e2e8f0;animation:pulse 1.5s infinite;"></span>
+                    </span>
                     <div style="font-size:11px;color:var(--muted);margin-top:4px;">Sales this week — {{ now()->startOfWeek()->format('d M') }} – {{ now()->endOfWeek()->format('d M Y') }}</div>
                 </div>
                 <a href="#" class="btn-outline" onclick="openPanel('panelRevenue');return false;">View Report</a>
@@ -584,24 +589,24 @@
                 <div class="stat-icon green"><i class="fas fa-users"></i></div>
                 <div class="stat-meta">
                     <div class="label">Total Customers</div>
-                    <div class="val">{{ number_format($totalCustomers) }}</div>
-                    @if($customerGrowth >= 0)
-                        <span class="badge-up"><i class="fas fa-arrow-up"></i> {{ $customerGrowth }}% this month</span>
-                    @else
-                        <span class="badge-down"><i class="fas fa-arrow-down"></i> {{ abs($customerGrowth) }}% this month</span>
-                    @endif
+                    <div class="val" id="val-customers">
+                        <span style="display:inline-block;width:60px;height:28px;border-radius:6px;background:#e2e8f0;animation:pulse 1.5s infinite;"></span>
+                    </div>
+                    <span id="val-customer-badge" class="badge-up">
+                        <span style="display:inline-block;width:80px;height:14px;border-radius:4px;background:#e2e8f0;animation:pulse 1.5s infinite;"></span>
+                    </span>
                 </div>
             </div>
             <div class="stat-item">
                 <div class="stat-icon blue"><i class="fas fa-print"></i></div>
                 <div class="stat-meta">
                     <div class="label">Total Photo (Today)</div>
-                    <div class="val">{{ number_format($totalPhotosToday) }}</div>
-                    @if($photoGrowth >= 0)
-                        <span class="badge-up"><i class="fas fa-arrow-up"></i> {{ $photoGrowth }}% vs yesterday</span>
-                    @else
-                        <span class="badge-down"><i class="fas fa-arrow-down"></i> {{ abs($photoGrowth) }}% vs yesterday</span>
-                    @endif
+                    <div class="val" id="val-photos">
+                        <span style="display:inline-block;width:60px;height:28px;border-radius:6px;background:#e2e8f0;animation:pulse 1.5s infinite;"></span>
+                    </div>
+                    <span id="val-photo-badge" class="badge-up">
+                        <span style="display:inline-block;width:80px;height:14px;border-radius:4px;background:#e2e8f0;animation:pulse 1.5s infinite;"></span>
+                    </span>
                 </div>
             </div>
         </div>
@@ -735,7 +740,7 @@
             {{-- Summary Stats --}}
             <div class="panel-summary">
                 <div class="panel-stat">
-                    <div class="ps-val">{{ number_format($totalCustomers) }}</div>
+                    <div class="ps-val" id="panel-total-customers">-</div>
                     <div class="ps-lbl">Total Customer</div>
                 </div>
                 <div class="panel-stat">
@@ -819,25 +824,17 @@
         <div class="panel-body">
             <div class="panel-summary">
                 <div class="panel-stat">
-                    <div class="ps-val" style="font-size:22px;">IDR {{ number_format($revenueThisWeek,0,',','.') }}</div>
+                    <div class="ps-val" style="font-size:22px;" id="panel-revenue-this-week">-</div>
                     <div class="ps-lbl">Revenue Minggu Ini</div>
-                    @if($revenueChangePercent >= 0)
-                        <div class="ps-badge" style="color:var(--green);"><i class="fas fa-arrow-up"></i> {{ $revenueChangePercent }}% vs lalu</div>
-                    @else
-                        <div class="ps-badge" style="color:var(--red);"><i class="fas fa-arrow-down"></i> {{ abs($revenueChangePercent) }}% vs lalu</div>
-                    @endif
+                    <div class="ps-badge" id="panel-revenue-badge">-</div>
                 </div>
                 <div class="panel-stat">
-                    <div class="ps-val">{{ number_format($totalOrdersThisWeek) }}</div>
+                    <div class="ps-val" id="panel-orders-this-week">-</div>
                     <div class="ps-lbl">Order Minggu Ini</div>
-                    @if($ordersChangePercent >= 0)
-                        <div class="ps-badge" style="color:var(--green);"><i class="fas fa-arrow-up"></i> {{ $ordersChangePercent }}%</div>
-                    @else
-                        <div class="ps-badge" style="color:var(--red);"><i class="fas fa-arrow-down"></i> {{ abs($ordersChangePercent) }}%</div>
-                    @endif
+                    <div class="ps-badge" id="panel-orders-badge">-</div>
                 </div>
                 <div class="panel-stat">
-                    <div class="ps-val">{{ number_format($totalPhotosToday) }}</div>
+                    <div class="ps-val" id="panel-photos-today">-</div>
                     <div class="ps-lbl">Foto Hari Ini</div>
                 </div>
             </div>
@@ -851,14 +848,7 @@
                     <thead>
                         <tr><th>Hari</th><th style="text-align:right;">Revenue (IDR)</th></tr>
                     </thead>
-                    <tbody>
-                        @foreach($revenueChart as $rc)
-                        <tr>
-                            <td>{{ $rc['label'] }}</td>
-                            <td style="text-align:right;font-weight:700;">{{ number_format($rc['value'],0,',','.') }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
         </div>
@@ -950,20 +940,16 @@
         <div class="panel-body">
             <div class="panel-summary">
                 <div class="panel-stat">
-                    <div class="ps-val">{{ number_format($totalOrdersThisWeek) }}</div>
+                    <div class="ps-val" id="panel-stat-orders">-</div>
                     <div class="ps-lbl">Order Minggu Ini</div>
-                    @if($ordersChangePercent >= 0)
-                        <div class="ps-badge" style="color:var(--green);"><i class="fas fa-arrow-up"></i> {{ $ordersChangePercent }}%</div>
-                    @else
-                        <div class="ps-badge" style="color:var(--red);"><i class="fas fa-arrow-down"></i> {{ abs($ordersChangePercent) }}%</div>
-                    @endif
+                    <div class="ps-badge" id="panel-stat-orders-badge">-</div>
                 </div>
                 <div class="panel-stat">
-                    <div class="ps-val">{{ number_format($totalCustomers) }}</div>
+                    <div class="ps-val" id="panel-stat-customers">-</div>
                     <div class="ps-lbl">Total Customer</div>
                 </div>
                 <div class="panel-stat">
-                    <div class="ps-val" style="font-size:20px;">IDR {{ number_format($revenueThisWeek,0,',','.') }}</div>
+                    <div class="ps-val" style="font-size:20px;" id="panel-stat-revenue">-</div>
                     <div class="ps-lbl">Revenue Minggu Ini</div>
                 </div>
             </div>
@@ -981,15 +967,7 @@
                             <th style="text-align:right;">Orders</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        @foreach($monthlyStats as $stat)
-                        <tr>
-                            <td>{{ $stat['date'] }}</td>
-                            <td style="text-align:right;font-weight:700;">{{ number_format($stat['revenue'],0,',','.') }}</td>
-                            <td style="text-align:right;font-weight:700;">{{ $stat['orders'] }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
         </div>
@@ -1005,6 +983,75 @@ let monthlyData = [];
 let revChart = null;
 let monthlyChart = null;
 
+fetch('/dashboard/stats')
+    .then(r => r.json())
+    .then(data => {
+        const fmt = n => parseInt(n).toLocaleString('id-ID');
+
+        // ── Card Revenue ──
+        document.getElementById('val-revenue').innerHTML = 'IDR ' + fmt(data.revenueThisWeek);
+        const revBadge = document.getElementById('val-revenue-badge');
+        if (data.revenueChangePercent >= 0) {
+            revBadge.className = 'badge-up';
+            revBadge.innerHTML = `<i class="fas fa-arrow-up"></i> ${data.revenueChangePercent}% vs last week`;
+        } else {
+            revBadge.className = 'badge-down';
+            revBadge.innerHTML = `<i class="fas fa-arrow-down"></i> ${Math.abs(data.revenueChangePercent)}% vs last week`;
+        }
+
+        // ── Card Customers ──
+        document.getElementById('val-customers').textContent = fmt(data.totalCustomers);
+        const custBadge = document.getElementById('val-customer-badge');
+        if (data.customerGrowth >= 0) {
+            custBadge.className = 'badge-up';
+            custBadge.innerHTML = `<i class="fas fa-arrow-up"></i> ${data.customerGrowth}% this month`;
+        } else {
+            custBadge.className = 'badge-down';
+            custBadge.innerHTML = `<i class="fas fa-arrow-down"></i> ${Math.abs(data.customerGrowth)}% this month`;
+        }
+
+        // ── Card Photos ──
+        document.getElementById('val-photos').textContent = fmt(data.totalPhotosToday);
+        const photoBadge = document.getElementById('val-photo-badge');
+        if (data.photoGrowth >= 0) {
+            photoBadge.className = 'badge-up';
+            photoBadge.innerHTML = `<i class="fas fa-arrow-up"></i> ${data.photoGrowth}% vs yesterday`;
+        } else {
+            photoBadge.className = 'badge-down';
+            photoBadge.innerHTML = `<i class="fas fa-arrow-down"></i> ${Math.abs(data.photoGrowth)}% vs yesterday`;
+        }
+
+        // ── Panel summaries ──
+        document.getElementById('panel-total-customers').textContent   = fmt(data.totalCustomers);
+        document.getElementById('panel-stat-customers').textContent    = fmt(data.totalCustomers);
+        document.getElementById('panel-photos-today').textContent      = fmt(data.totalPhotosToday);
+        document.getElementById('panel-orders-this-week').textContent  = fmt(data.totalOrdersThisWeek);
+        document.getElementById('panel-stat-orders').textContent       = fmt(data.totalOrdersThisWeek);
+        document.getElementById('panel-revenue-this-week').textContent = 'IDR ' + fmt(data.revenueThisWeek);
+        document.getElementById('panel-stat-revenue').textContent      = 'IDR ' + fmt(data.revenueThisWeek);
+
+        // Revenue badge panel
+        const rp = document.getElementById('panel-revenue-badge');
+        rp.style.color = data.revenueChangePercent >= 0 ? 'var(--green)' : 'var(--red)';
+        rp.innerHTML = data.revenueChangePercent >= 0
+            ? `<i class="fas fa-arrow-up"></i> ${data.revenueChangePercent}% vs lalu`
+            : `<i class="fas fa-arrow-down"></i> ${Math.abs(data.revenueChangePercent)}% vs lalu`;
+
+        // Orders badge panel
+        const op = document.getElementById('panel-orders-badge');
+        op.style.color = data.ordersChangePercent >= 0 ? 'var(--green)' : 'var(--red)';
+        op.innerHTML = data.ordersChangePercent >= 0
+            ? `<i class="fas fa-arrow-up"></i> ${data.ordersChangePercent}%`
+            : `<i class="fas fa-arrow-down"></i> ${Math.abs(data.ordersChangePercent)}%`;
+
+        // Stat orders badge panel
+        const sop = document.getElementById('panel-stat-orders-badge');
+        sop.style.color = data.ordersChangePercent >= 0 ? 'var(--green)' : 'var(--red)';
+        sop.innerHTML = data.ordersChangePercent >= 0
+            ? `<i class="fas fa-arrow-up"></i> ${data.ordersChangePercent}%`
+            : `<i class="fas fa-arrow-down"></i> ${Math.abs(data.ordersChangePercent)}%`;
+    });
+
 fetch('/dashboard/chart-data')
     .then(r => r.json())
     .then(data => {
@@ -1012,6 +1059,29 @@ fetch('/dashboard/chart-data')
         monthlyData = data.monthlyStats;
         renderRevenueChart();
         renderMonthlyChart();
+
+        // ── Update tabel Revenue per Hari di panel ──
+        const revTableBody = document.querySelector('#panelRevenue .panel-table tbody');
+        if (revTableBody) {
+            revTableBody.innerHTML = revenueData.map(rc => `
+                <tr>
+                    <td>${rc.label}</td>
+                    <td style="text-align:right;font-weight:700;">${parseInt(rc.value).toLocaleString('id-ID')}</td>
+                </tr>
+            `).join('');
+        }
+
+        // ── Update tabel Statistik per Hari di panel ──
+        const statTableBody = document.querySelector('#panelStatistics .panel-table tbody');
+        if (statTableBody) {
+            statTableBody.innerHTML = monthlyData.map(stat => `
+                <tr>
+                    <td>${stat.date}</td>
+                    <td style="text-align:right;font-weight:700;">${parseInt(stat.revenue).toLocaleString('id-ID')}</td>
+                    <td style="text-align:right;font-weight:700;">${stat.orders}</td>
+                </tr>
+            `).join('');
+        }
     });
 
 // ── Revenue Chart ──────────────────────────────────────────
