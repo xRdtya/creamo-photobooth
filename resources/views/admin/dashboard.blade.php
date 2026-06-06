@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Admin | CREAMO</title>
     <link rel="shortcut icon" href="/assets/img/logo.svg" type="image/x-icon">
+    <link rel="preload" as="image" href="/assets/img/logocreamo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -520,7 +521,7 @@
 
 <!-- ══ SIDEBAR ══════════════════════════════════════════ -->
 <aside class="sidebar">
-    <img src="/assets/img/logocreamo.png" alt="Creamo Logo" class="w-full drop-shadow-md">
+    <img src="/assets/img/logocreamo.png" alt="Creamo Logo" class="w-full drop-shadow-md" fetchpriority="high" loading="eager">>
 
     <div class="sidebar-section-label">Menu</div>
     <ul class="sidebar-menu">
