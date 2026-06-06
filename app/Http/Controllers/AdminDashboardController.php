@@ -84,8 +84,9 @@ class AdminDashboardController extends Controller
             : 0;
 
         // ── 3. RECENT TRANSACTIONS (1 query) ─────────────────────────────
-        $transactions = Transaction::with('photoSessions')
+        $transactions = Transaction::with(['photoSessions:id,transaction_id,kode_download,status_cetak'])
             ->where('merchant_id', $merchantId)
+            ->select('id', 'order_id', 'customer_name', 'email', 'gross_amount', 'payment_status', 'created_at')
             ->orderBy('created_at', 'desc')
             ->take(10)
             ->get();
