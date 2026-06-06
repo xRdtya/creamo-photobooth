@@ -521,7 +521,7 @@
 
 <!-- ══ SIDEBAR ══════════════════════════════════════════ -->
 <aside class="sidebar">
-    <img src="/assets/img/logocreamo.png" alt="Creamo Logo" class="w-full drop-shadow-md" fetchpriority="high" loading="eager">>
+    <img src="/assets/img/logocreamo.png" alt="Creamo Logo" class="w-full drop-shadow-md" fetchpriority="high" loading="eager">
 
     <div class="sidebar-section-label">Menu</div>
     <ul class="sidebar-menu">

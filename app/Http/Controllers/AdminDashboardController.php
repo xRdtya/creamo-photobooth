@@ -28,14 +28,21 @@ class AdminDashboardController extends Controller
             ->take(10)
             ->get();
 
-        $activeDevices = PhotoSession::whereRaw('"is_active" = true')
-            ->whereRaw('"last_ping_at" >= ?', [now()->subMinutes(5)])
-            ->whereHas('transaction', fn($q) => $q->where('merchant_id', $merchantId))
-            ->with(['transaction:id,order_id,merchant_id,created_at'])
-            ->orderBy('last_ping_at', 'desc')
+        $activeDevices = PhotoSession::join('transactions', 'photo_sessions.transaction_id', '=', 'transactions.id')
+            ->where('transactions.merchant_id', $merchantId)
+            ->whereRaw('photo_sessions."is_active" = true')
+            ->whereRaw('photo_sessions."last_ping_at" >= ?', [now()->subMinutes(5)])
+            ->select(
+                'photo_sessions.*',
+                'transactions.order_id as trx_order_id',
+                'transactions.created_at as trx_created_at'
+            )
+            ->orderBy('photo_sessions.last_ping_at', 'desc')
             ->get();
 
-        return view('admin.dashboard', compact('merchant', 'transactions', 'reviews', 'activeDevices'));
+        $activeDeviceCount = $activeDevices->count();
+
+        return view('admin.dashboard', compact('merchant', 'transactions', 'reviews', 'activeDeviceCount'));
     }
 
     public function stats()
@@ -176,19 +183,25 @@ class AdminDashboardController extends Controller
     {
         $merchant = Auth::guard('merchant')->user();
 
-        $devices = PhotoSession::active()
-            ->whereHas('transaction', fn($q) => $q->where('merchant_id', $merchant->id))
-            ->with(['transaction:id,order_id,created_at'])
-            ->orderBy('last_ping_at', 'desc')
+        $devices = PhotoSession::join('transactions', 'photo_sessions.transaction_id', '=', 'transactions.id')
+            ->where('transactions.merchant_id', $merchant->id)
+            ->whereRaw('photo_sessions."is_active" = true')
+            ->whereRaw('photo_sessions."last_ping_at" >= ?', [now()->subMinutes(5)])
+            ->select(
+                'photo_sessions.*',
+                'transactions.order_id as trx_order_id',
+                'transactions.created_at as trx_created_at'
+            )
+            ->orderBy('photo_sessions.last_ping_at', 'desc')
             ->get()
             ->map(fn($s) => [
-                'id'            => $s->id,
-                'device_name'   => $s->device_name ?? 'Device #' . $s->id,
-                'order_id'      => $s->transaction->order_id ?? '-',
-                'email'         => $s->email,
-                'status_cetak'  => $s->status_cetak,
-                'waktu_mulai'   => $s->waktu_mulai?->format('H:i:s'),
-                'last_ping_at'  => $s->last_ping_at?->diffForHumans(),
+                'id'           => $s->id,
+                'device_name'  => $s->device_name ?? 'Device #' . $s->id,
+                'order_id'     => $s->trx_order_id ?? '-',
+                'email'        => $s->email,
+                'status_cetak' => $s->status_cetak,
+                'waktu_mulai'  => $s->waktu_mulai ? \Carbon\Carbon::parse($s->waktu_mulai)->format('H:i:s') : null,
+                'last_ping_at' => $s->last_ping_at ? \Carbon\Carbon::parse($s->last_ping_at)->diffForHumans() : null,
             ]);
 
         return response()->json([
