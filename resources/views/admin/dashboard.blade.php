@@ -515,6 +515,196 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.4; }
         }
+
+        /* ── FORM INPUTS (panels) ───────────────────────── */
+        .panel-form-group {
+            margin-bottom: 18px;
+        }
+        .panel-form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            margin-bottom: 6px;
+        }
+        .panel-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            background: #f8fafc;
+            transition: border-color .2s, box-shadow .2s;
+            outline: none;
+        }
+        .panel-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59,75,134,.12);
+            background: #fff;
+        }
+        .panel-input::placeholder {
+            color: #94a3b8;
+        }
+        .panel-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            background: #f8fafc;
+            cursor: pointer;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+            -webkit-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 40px;
+        }
+        .panel-select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59,75,134,.12);
+            background-color: #fff;
+        }
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 28px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: transform .15s, box-shadow .2s;
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(59,75,134,.35);
+        }
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        .btn-primary:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .panel-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        /* ── TOAST NOTIFICATION ─────────────────────────── */
+        .toast-notification {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 9999;
+            min-width: 320px;
+            padding: 16px 22px;
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            box-shadow: 0 12px 40px rgba(0,0,0,.18);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateX(120%);
+            transition: transform .35s cubic-bezier(.34,1.28,.64,1);
+        }
+        .toast-notification.show {
+            transform: translateX(0);
+        }
+        .toast-notification.success {
+            background: #dcfce7;
+            color: #15803d;
+            border: 1.5px solid #bbf7d0;
+        }
+        .toast-notification.error {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1.5px solid #fecaca;
+        }
+        .toast-notification i {
+            font-size: 18px;
+        }
+
+        /* ── WITHDRAW STATUS BADGES ─────────────────────── */
+        .wd-status {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .wd-status.pending  { background: #fef9c3; color: #92400e; }
+        .wd-status.approved { background: #dcfce7; color: #15803d; }
+        .wd-status.rejected { background: #fee2e2; color: #b91c1c; }
+
+        /* ── ABOUT PANEL ────────────────────────────────── */
+        .about-hero {
+            background: linear-gradient(135deg, #3b4b86 0%, #5b6fb5 100%);
+            border-radius: 20px;
+            padding: 36px 32px;
+            color: #fff;
+            margin-bottom: 24px;
+        }
+        .about-hero h3 {
+            font-size: 26px;
+            font-weight: 800;
+            line-height: 1.3;
+            margin-bottom: 16px;
+        }
+        .about-hero p {
+            font-size: 14px;
+            line-height: 1.8;
+            opacity: .92;
+        }
+        .about-contact {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 14px;
+        }
+        .about-contact-item {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+        }
+        .about-contact-item i {
+            font-size: 24px;
+            color: var(--accent);
+            margin-bottom: 10px;
+            display: block;
+        }
+        .about-contact-item .aci-label {
+            font-size: 11px;
+            color: var(--muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+        .about-contact-item .aci-val {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+            margin-top: 4px;
+            word-break: break-all;
+        }
     </style>
 </head>
 <body>
@@ -535,9 +725,9 @@
 
     <div class="sidebar-section-label">Others</div>
     <ul class="sidebar-menu">
-        <li><a href="#"><i class="fas fa-user"></i> Accounts</a></li>
-        <li><a href="#"><i class="fas fa-credit-card"></i> Payment</a></li>
-        <li><a href="#"><i class="fas fa-question-circle"></i> Help</a></li>
+        <li><a href="#" onclick="openPanel('panelAccount');return false;"><i class="fas fa-user"></i> Account</a></li>
+        <li><a href="#" onclick="openPanel('panelWithdraw');return false;"><i class="fas fa-credit-card"></i> Payment</a></li>
+        <li><a href="#" onclick="openPanel('panelAbout');return false;"><i class="fas fa-info-circle"></i> About</a></li>
     </ul>
 
     <div class="sidebar-bottom">
@@ -988,6 +1178,261 @@
 
 
 
+{{-- ══ TOAST NOTIFICATION ═══════════════════════════════════════ --}}
+<div class="toast-notification" id="toastNotif">
+    <i class="fas fa-check-circle"></i>
+    <span id="toastMsg">Success</span>
+</div>
+
+{{-- ══ PANEL: WITHDRAW (PAYMENT) ═══════════════════════════════ --}}
+<div class="panel-overlay" id="panelWithdraw">
+    <div class="panel-backdrop" onclick="closePanel('panelWithdraw')"></div>
+    <div class="panel-sheet">
+        <div class="panel-head">
+            <div class="panel-head-left">
+                <div class="panel-head-icon" style="background:linear-gradient(135deg,#0ea5e9,#38bdf8);"><i class="fas fa-credit-card"></i></div>
+                <div>
+                    <h2>Penarikan Dana</h2>
+                    <div class="panel-head-sub">Withdraw saldo dari pembayaran customer</div>
+                </div>
+            </div>
+            <button class="panel-close" onclick="closePanel('panelWithdraw')"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="panel-body">
+            {{-- Balance Summary --}}
+            <div class="panel-summary">
+                <div class="panel-stat">
+                    <div class="ps-val" id="wd-total-revenue" style="font-size:20px;">-</div>
+                    <div class="ps-lbl">Total Revenue</div>
+                </div>
+                <div class="panel-stat">
+                    <div class="ps-val" id="wd-total-withdrawn" style="font-size:20px;color:var(--green);">-</div>
+                    <div class="ps-lbl">Sudah Ditarik</div>
+                </div>
+                <div class="panel-stat">
+                    <div class="ps-val" id="wd-total-pending" style="font-size:20px;color:var(--gold);">-</div>
+                    <div class="ps-lbl">Menunggu Proses</div>
+                </div>
+                <div class="panel-stat">
+                    <div class="ps-val" id="wd-available" style="font-size:20px;color:var(--accent);">-</div>
+                    <div class="ps-lbl">Saldo Tersedia</div>
+                </div>
+            </div>
+
+            {{-- Withdraw Form --}}
+            <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+                <i class="fas fa-paper-plane" style="color:var(--accent);"></i> Request Penarikan
+            </div>
+            <form id="withdrawForm" onsubmit="submitWithdraw(event)">
+                <div class="panel-row">
+                    <div class="panel-form-group">
+                        <label>Jumlah (IDR)</label>
+                        <input type="number" class="panel-input" name="amount" id="wdAmount" placeholder="Min. 10.000" min="10000" required>
+                    </div>
+                    <div class="panel-form-group">
+                        <label>Metode</label>
+                        <select class="panel-select" name="method" id="wdMethod" required>
+                            <option value="bank_transfer">Bank Transfer</option>
+                            <option value="ewallet">E-Wallet</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="panel-row">
+                    <div class="panel-form-group">
+                        <label>Nama Bank / E-Wallet</label>
+                        <input type="text" class="panel-input" name="bank_name" id="wdBankName" placeholder="cth: BCA, Mandiri, GoPay" required>
+                    </div>
+                    <div class="panel-form-group">
+                        <label>Nomor Rekening / ID</label>
+                        <input type="text" class="panel-input" name="account_number" id="wdAccNumber" placeholder="cth: 1234567890" required>
+                    </div>
+                </div>
+                <div class="panel-form-group">
+                    <label>Nama Pemilik Rekening</label>
+                    <input type="text" class="panel-input" name="account_holder" id="wdAccHolder" placeholder="Nama sesuai rekening" required>
+                </div>
+                <div class="panel-form-group">
+                    <label>Catatan (opsional)</label>
+                    <input type="text" class="panel-input" name="notes" id="wdNotes" placeholder="Catatan tambahan...">
+                </div>
+                <button type="submit" class="btn-primary" id="wdSubmitBtn">
+                    <i class="fas fa-paper-plane"></i> Kirim Request Withdraw
+                </button>
+            </form>
+
+            {{-- Withdraw History --}}
+            <div style="font-size:14px;font-weight:700;color:var(--text);margin:28px 0 14px;display:flex;align-items:center;gap:8px;">
+                <i class="fas fa-list" style="color:var(--accent);"></i> Riwayat Penarikan
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="panel-table" id="wdHistoryTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Jumlah</th>
+                            <th>Metode</th>
+                            <th>Rekening</th>
+                            <th>Status</th>
+                            <th>Tanggal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="6" class="panel-empty"><i class="fas fa-spinner fa-spin"></i>Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- ══ PANEL: ACCOUNT (CHANGE PASSWORD) ══════════════════════════ --}}
+<div class="panel-overlay" id="panelAccount">
+    <div class="panel-backdrop" onclick="closePanel('panelAccount')"></div>
+    <div class="panel-sheet" style="max-width:560px;">
+        <div class="panel-head">
+            <div class="panel-head-left">
+                <div class="panel-head-icon" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa);"><i class="fas fa-user-cog"></i></div>
+                <div>
+                    <h2>Pengaturan Akun</h2>
+                    <div class="panel-head-sub">Kelola keamanan akun Anda</div>
+                </div>
+            </div>
+            <button class="panel-close" onclick="closePanel('panelAccount')"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="panel-body">
+            {{-- Account Info --}}
+            <div style="display:flex;align-items:center;gap:16px;background:#f8fafc;border-radius:16px;padding:20px;margin-bottom:24px;">
+                <div style="width:52px;height:52px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;font-weight:800;">
+                    {{ strtoupper(substr($merchant->business_name, 0, 1)) }}
+                </div>
+                <div>
+                    <div style="font-size:16px;font-weight:700;color:var(--text);">{{ $merchant->business_name }}</div>
+                    <div style="font-size:13px;color:var(--muted);">{{ $merchant->email }}</div>
+                </div>
+            </div>
+
+            {{-- Change Password Form --}}
+            @php
+                $hasPassword = !empty($merchant->password) && str_starts_with($merchant->password, '$');
+            @endphp
+            <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+                <i class="fas fa-lock" style="color:var(--accent);"></i> {{ $hasPassword ? 'Ubah Password' : 'Set Password Baru' }}
+            </div>
+            @if(!$hasPassword)
+                <div style="font-size:12px;color:var(--muted);background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px 14px;margin-bottom:16px;line-height:1.4;">
+                    <i class="fas fa-info-circle" style="color:#16a34a;margin-right:6px;"></i>
+                    Akun Anda terdaftar melalui Google/Apple. Silakan set password baru agar Anda dapat login langsung menggunakan email dan password.
+                </div>
+            @endif
+            <form id="changePasswordForm" onsubmit="submitChangePassword(event)">
+                @if($hasPassword)
+                <div class="panel-form-group">
+                    <label>Password Lama</label>
+                    <input type="password" class="panel-input" name="old_password" id="cpOldPassword" placeholder="Masukkan password lama" required>
+                </div>
+                @endif
+                <div class="panel-form-group">
+                    <label>Password Baru</label>
+                    <input type="password" class="panel-input" name="new_password" id="cpNewPassword" placeholder="Min. 8 karakter" minlength="8" required>
+                </div>
+                <div class="panel-form-group">
+                    <label>Konfirmasi Password Baru</label>
+                    <input type="password" class="panel-input" name="new_password_confirmation" id="cpConfirmPassword" placeholder="Ulangi password baru" minlength="8" required>
+                </div>
+                <button type="submit" class="btn-primary" id="cpSubmitBtn">
+                    <i class="fas fa-save"></i> {{ $hasPassword ? 'Simpan Password' : 'Set Password' }}
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{{-- ══ PANEL: ABOUT ══════════════════════════════════════════════ --}}
+<div class="panel-overlay" id="panelAbout">
+    <div class="panel-backdrop" onclick="closePanel('panelAbout')"></div>
+    <div class="panel-sheet" style="max-width:720px;">
+        <div class="panel-head">
+            <div class="panel-head-left">
+                <div class="panel-head-icon" style="background:linear-gradient(135deg,#3b4b86,#5b6fb5);"><i class="fas fa-info-circle"></i></div>
+                <div>
+                    <h2>Tentang CREAMO</h2>
+                    <div class="panel-head-sub">Informasi tentang platform kami</div>
+                </div>
+            </div>
+            <button class="panel-close" onclick="closePanel('panelAbout')"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="panel-body">
+            {{-- Hero About --}}
+            <div class="about-hero">
+                <div style="display:inline-block;background:rgba(255,255,255,.15);padding:6px 18px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:16px;">About Us</div>
+                <h3>Photobooth Digital<br>untuk Setiap Momen<br>Berhargamu</h3>
+                <p>
+                    Creamo adalah platform Software as a Service (SaaS) inovatif yang membawa pengalaman photobooth ke level berikutnya. Kami menyediakan solusi dokumentasi digital yang praktis, interaktif, dan mudah diakses. Dengan Creamo, setiap perayaan mulai dari festival, bazaar, hingga acara kampus dapat menghadirkan keseruan berfoto tanpa perlu menyewa bilik atau mesin cetak tradisional yang memakan banyak tempat.
+                </p>
+                <br>
+                <p>
+                    Misi kami adalah memudahkan semua orang dalam mengabadikan kebahagiaan. Melalui integrasi teknologi yang seamless, mulai dari kemudahan transaksi hingga kustomisasi bingkai foto yang menarik, Creamo memastikan pengalaman menyimpan kenangan menjadi lebih cepat, modern, dan pastinya tak terlupakan.
+                </p>
+            </div>
+
+            {{-- Feature Cards --}}
+            <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+                <i class="fas fa-star" style="color:var(--gold);"></i> Keunggulan Kami
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:24px;">
+                <div style="background:#f8fafc;border-radius:16px;padding:20px;text-align:center;">
+                    <div style="width:48px;height:48px;background:#dbeafe;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:20px;color:#2563eb;">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">Easy Payment</div>
+                    <div style="font-size:11px;color:var(--muted);line-height:1.5;">Kemudahan bertransaksi menggunakan QRIS dan berbagai E-Wallet.</div>
+                </div>
+                <div style="background:#f8fafc;border-radius:16px;padding:20px;text-align:center;">
+                    <div style="width:48px;height:48px;background:#dcfce7;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:20px;color:#16a34a;">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">Safe Transaction</div>
+                    <div style="font-size:11px;color:var(--muted);line-height:1.5;">Sistem pembayaran terintegrasi dan terenkripsi.</div>
+                </div>
+                <div style="background:#f8fafc;border-radius:16px;padding:20px;text-align:center;">
+                    <div style="width:48px;height:48px;background:#fef9c3;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:20px;color:#ca8a04;">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">Quick Transaction</div>
+                    <div style="font-size:11px;color:var(--muted);line-height:1.5;">Verifikasi pembayaran instan dalam hitungan detik.</div>
+                </div>
+            </div>
+
+            {{-- Contact Info --}}
+            <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+                <i class="fas fa-map-marker-alt" style="color:var(--accent);"></i> Hubungi Kami
+            </div>
+            <div class="about-contact">
+                <div class="about-contact-item">
+                    <i class="fas fa-building"></i>
+                    <div class="aci-label">Head Office</div>
+                    <div class="aci-val">Jalan Pelita Blok D No. 9, Banjarbaru, Kalimantan Selatan</div>
+                </div>
+                <div class="about-contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <div class="aci-label">Email</div>
+                    <div class="aci-val">creamophotography@gmail.com</div>
+                </div>
+                <div class="about-contact-item">
+                    <i class="fas fa-phone"></i>
+                    <div class="aci-label">Telepon</div>
+                    <div class="aci-val">0852-4871-3983</div>
+                </div>
+            </div>
+
+            {{-- Footer --}}
+            <div style="text-align:center;margin-top:28px;padding-top:18px;border-top:1.5px solid var(--border);font-size:12px;color:var(--muted);">
+                &copy; 2026 Creamo, All rights reserved.
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 let revenueData = [];
 let monthlyData = [];
@@ -1274,7 +1719,7 @@ function closePanel(id) {
 // Close all panels on Escape
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
-        ['panelPayment','panelRevenue','panelRating','panelStatistics'].forEach(closePanel);
+        ['panelPayment','panelRevenue','panelRating','panelStatistics','panelWithdraw','panelAccount','panelAbout'].forEach(closePanel);
     }
 });
 
@@ -1290,6 +1735,169 @@ function filterTable(tableId, status, chip) {
         } else {
             row.style.display = 'none';
         }
+    });
+}
+</script>
+
+<script>
+// ── CSRF token ───────────────────────────────────────────────
+const csrfToken = '{{ csrf_token() }}';
+
+// ── Toast notification helper ───────────────────────────────
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('toastNotif');
+    const msg = document.getElementById('toastMsg');
+    const icon = toast.querySelector('i');
+
+    toast.className = 'toast-notification ' + type;
+    msg.textContent = message;
+    icon.className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 4000);
+}
+
+// ── Withdraw: load data when panel opens ─────────────────────
+const _origOpenPanel = openPanel;
+openPanel = function(id) {
+    _origOpenPanel(id);
+    if (id === 'panelWithdraw' && !window._wdLoaded) {
+        loadWithdrawData();
+    }
+};
+
+function loadWithdrawData() {
+    const fmt = n => 'IDR ' + parseInt(n).toLocaleString('id-ID');
+    fetch('/dashboard/withdrawals')
+        .then(r => r.json())
+        .then(data => {
+            window._wdLoaded = true;
+            document.getElementById('wd-total-revenue').textContent = fmt(data.totalRevenue);
+            document.getElementById('wd-total-withdrawn').textContent = fmt(data.totalWithdrawn);
+            document.getElementById('wd-total-pending').textContent = fmt(data.totalPending);
+            document.getElementById('wd-available').textContent = fmt(data.available);
+
+            const tbody = document.querySelector('#wdHistoryTable tbody');
+            if (data.withdrawals.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="panel-empty"><i class="fas fa-inbox"></i>Belum ada riwayat penarikan</td></tr>';
+            } else {
+                tbody.innerHTML = data.withdrawals.map((w, i) => `
+                    <tr>
+                        <td style="color:var(--muted);font-weight:600;">${i + 1}</td>
+                        <td style="font-weight:700;">IDR ${parseInt(w.amount).toLocaleString('id-ID')}</td>
+                        <td>${w.method === 'bank_transfer' ? 'Bank Transfer' : 'E-Wallet'}</td>
+                        <td>${w.bank_name} - ${w.account_number}<br><span style="font-size:11px;color:var(--muted);">${w.account_holder}</span></td>
+                        <td><span class="wd-status ${w.status}">${w.status.charAt(0).toUpperCase() + w.status.slice(1)}</span></td>
+                        <td>${w.created_at}</td>
+                    </tr>
+                `).join('');
+            }
+        })
+        .catch(() => {
+            document.querySelector('#wdHistoryTable tbody').innerHTML =
+                '<tr><td colspan="6" class="panel-empty"><i class="fas fa-exclamation-triangle"></i>Gagal memuat data</td></tr>';
+        });
+}
+
+// ── Withdraw: submit form ───────────────────────────────────
+function submitWithdraw(e) {
+    e.preventDefault();
+    const btn = document.getElementById('wdSubmitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+
+    const body = {
+        amount: document.getElementById('wdAmount').value,
+        method: document.getElementById('wdMethod').value,
+        bank_name: document.getElementById('wdBankName').value,
+        account_number: document.getElementById('wdAccNumber').value,
+        account_holder: document.getElementById('wdAccHolder').value,
+        notes: document.getElementById('wdNotes').value,
+    };
+
+    fetch('/dashboard/withdraw', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json',
+        },
+        body: JSON.stringify(body),
+    })
+    .then(async r => {
+        const data = await r.json();
+        if (!r.ok) throw data;
+        return data;
+    })
+    .then(data => {
+        showToast(data.message, 'success');
+        document.getElementById('withdrawForm').reset();
+        window._wdLoaded = false;
+        loadWithdrawData();
+    })
+    .catch(err => {
+        const msg = err.message || err.errors ? Object.values(err.errors || {}).flat().join(', ') : 'Gagal mengirim request';
+        showToast(err.message || msg, 'error');
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Request Withdraw';
+    });
+}
+
+// ── Change Password: submit form ────────────────────────────
+function submitChangePassword(e) {
+    e.preventDefault();
+    const newPw = document.getElementById('cpNewPassword').value;
+    const confirmPw = document.getElementById('cpConfirmPassword').value;
+
+    if (newPw !== confirmPw) {
+        showToast('Password baru dan konfirmasi tidak cocok!', 'error');
+        return;
+    }
+
+    const btn = document.getElementById('cpSubmitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+
+    const oldPwEl = document.getElementById('cpOldPassword');
+    const isSettingPassword = !oldPwEl;
+    const endpoint = isSettingPassword ? '/dashboard/set-password' : '/dashboard/change-password';
+    
+    const bodyData = {
+        new_password: newPw,
+        new_password_confirmation: confirmPw,
+    };
+    if (oldPwEl) {
+        bodyData.old_password = oldPwEl.value;
+    }
+
+    fetch(endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json',
+        },
+        body: JSON.stringify(bodyData),
+    })
+    .then(async r => {
+        const data = await r.json();
+        if (!r.ok) throw data;
+        return data;
+    })
+    .then(data => {
+        showToast(data.message, 'success');
+        document.getElementById('changePasswordForm').reset();
+        setTimeout(() => location.reload(), 1500);
+    })
+    .catch(err => {
+        const msg = err.message || (err.errors ? Object.values(err.errors).flat().join(', ') : 'Gagal memproses password');
+        showToast(msg, 'error');
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save"></i> ' + (isSettingPassword ? 'Set Password' : 'Simpan Password');
     });
 }
 </script>

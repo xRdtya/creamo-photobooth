@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Transaction;
 use App\Models\PhotoSession;
 use App\Models\Review;
+use App\Models\Withdrawal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 
 class AdminDashboardController extends Controller
@@ -35,8 +37,8 @@ class AdminDashboardController extends Controller
         $t3 = microtime(true);
         $activeDevices = PhotoSession::join('transactions', 'photo_sessions.transaction_id', '=', 'transactions.id')
             ->where('transactions.merchant_id', $merchantId)
-            ->whereRaw('photo_sessions."is_active" = true')
-            ->whereRaw('photo_sessions."last_ping_at" >= ?', [now()->subMinutes(5)])
+            ->where('photo_sessions.is_active', true)
+            ->where('photo_sessions.last_ping_at', '>=', now()->subMinutes(5))
             ->select(
                 'photo_sessions.*',
                 'transactions.order_id as trx_order_id',
@@ -193,8 +195,8 @@ class AdminDashboardController extends Controller
 
         $devices = PhotoSession::join('transactions', 'photo_sessions.transaction_id', '=', 'transactions.id')
             ->where('transactions.merchant_id', $merchant->id)
-            ->whereRaw('photo_sessions."is_active" = true')
-            ->whereRaw('photo_sessions."last_ping_at" >= ?', [now()->subMinutes(5)])
+            ->where('photo_sessions.is_active', true)
+            ->where('photo_sessions.last_ping_at', '>=', now()->subMinutes(5))
             ->select(
                 'photo_sessions.*',
                 'transactions.order_id as trx_order_id',
@@ -215,6 +217,165 @@ class AdminDashboardController extends Controller
         return response()->json([
             'count'   => $devices->count(),
             'devices' => $devices,
+        ]);
+    }
+
+    /**
+     * Ganti password merchant.
+     */
+    public function changePassword(Request $request)
+    {
+        $merchant = Auth::guard('merchant')->user();
+
+        // Merchant yang login via OAuth tanpa password
+        if (empty($merchant->password) || !str_starts_with($merchant->password, '$')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akun Anda terdaftar melalui Google/Apple. Silakan set password baru.',
+                'needs_set' => true,
+            ], 422);
+        }
+
+        $request->validate([
+            'old_password' => 'required',
+            'new_password' => 'required|string|min:8|confirmed',
+        ]);
+
+        if (!Hash::check($request->old_password, $merchant->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Password lama tidak cocok.',
+            ], 422);
+        }
+
+        $merchant->password = Hash::make($request->new_password);
+        $merchant->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password berhasil diubah!',
+        ]);
+    }
+
+    /**
+     * Set password untuk merchant OAuth (belum punya password).
+     */
+    public function setPassword(Request $request)
+    {
+        $merchant = Auth::guard('merchant')->user();
+
+        // Hanya boleh dipakai jika merchant belum punya password (akun OAuth)
+        if (!empty($merchant->password) && str_starts_with($merchant->password, '$')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akun Anda sudah memiliki password. Gunakan fitur Ubah Password.',
+            ], 422);
+        }
+
+        $request->validate([
+            'new_password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $merchant->password = Hash::make($request->new_password);
+        $merchant->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password berhasil diset! Sekarang Anda bisa login dengan email & password.',
+        ]);
+    }
+
+    /**
+     * Request penarikan dana (withdraw).
+     */
+    public function requestWithdraw(Request $request)
+    {
+        $merchant = Auth::guard('merchant')->user();
+
+        $request->validate([
+            'amount'         => 'required|numeric|min:10000',
+            'method'         => 'required|in:bank_transfer,ewallet',
+            'bank_name'      => 'required|string|max:100',
+            'account_number' => 'required|string|max:50',
+            'account_holder' => 'required|string|max:100',
+        ]);
+
+        // Hitung saldo tersedia
+        $totalRevenue = Transaction::where('merchant_id', $merchant->id)
+            ->where('payment_status', 'success')
+            ->sum('gross_amount');
+
+        $totalWithdrawn = Withdrawal::where('merchant_id', $merchant->id)
+            ->whereIn('status', ['pending', 'approved'])
+            ->sum('amount');
+
+        $available = $totalRevenue - $totalWithdrawn;
+
+        if ($request->amount > $available) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Jumlah penarikan melebihi saldo tersedia (IDR ' . number_format($available, 0, ',', '.') . ').',
+            ], 422);
+        }
+
+        $withdrawal = Withdrawal::create([
+            'merchant_id'    => $merchant->id,
+            'amount'         => $request->amount,
+            'method'         => $request->method,
+            'bank_name'      => $request->bank_name,
+            'account_number' => $request->account_number,
+            'account_holder' => $request->account_holder,
+            'status'         => 'pending',
+            'notes'          => $request->notes,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Request penarikan dana berhasil dikirim! Menunggu proses.',
+            'withdrawal' => $withdrawal,
+        ]);
+    }
+
+    /**
+     * Riwayat penarikan dana.
+     */
+    public function withdrawHistory()
+    {
+        $merchant = Auth::guard('merchant')->user();
+
+        $totalRevenue = Transaction::where('merchant_id', $merchant->id)
+            ->where('payment_status', 'success')
+            ->sum('gross_amount');
+
+        $totalWithdrawn = Withdrawal::where('merchant_id', $merchant->id)
+            ->where('status', 'approved')
+            ->sum('amount');
+
+        $totalPending = Withdrawal::where('merchant_id', $merchant->id)
+            ->where('status', 'pending')
+            ->sum('amount');
+
+        $withdrawals = Withdrawal::where('merchant_id', $merchant->id)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(fn($w) => [
+                'id'             => $w->id,
+                'amount'         => $w->amount,
+                'method'         => $w->method,
+                'bank_name'      => $w->bank_name,
+                'account_number' => $w->account_number,
+                'account_holder' => $w->account_holder,
+                'status'         => $w->status,
+                'notes'          => $w->notes,
+                'created_at'     => $w->created_at->format('d M Y H:i'),
+            ]);
+
+        return response()->json([
+            'totalRevenue'   => $totalRevenue,
+            'totalWithdrawn' => $totalWithdrawn,
+            'totalPending'   => $totalPending,
+            'available'      => $totalRevenue - $totalWithdrawn - $totalPending,
+            'withdrawals'    => $withdrawals,
         ]);
     }
 }
