@@ -165,18 +165,42 @@ class PhotoSessionController extends Controller
                 return redirect()->back()->withErrors(['error' => 'File foto tidak ditemukan.']);
             }
 
-            if (str_starts_with($path, 'http')) {
-                return redirect($path);
+            // Kalau sudah full URL, tetap proxy — jangan redirect langsung
+            $publicUrl = str_starts_with($path, 'http')
+                ? $path
+                : 'https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/' . $path;
+
+            // Ambil file via cURL (lebih reliable dari file_get_contents)
+            $ch = curl_init($publicUrl);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_TIMEOUT        => 30,
+            ]);
+            $content = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $mimeType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+            curl_close($ch);
+
+            if ($content === false || $httpCode !== 200) {
+                return redirect()->back()->withErrors(['error' => 'File tidak dapat diakses dari Supabase.']);
             }
 
-            $publicUrl = 'https://ywrswuyjuvgrnfmugxwm.supabase.co/storage/v1/object/public/photos/' . $path;
+            // Tentukan ekstensi dari mime type
+            $extension = match (explode(';', $mimeType)[0]) {
+                'image/jpeg' => 'jpg',
+                'image/webp' => 'webp',
+                'application/zip' => 'zip',
+                default      => 'png',
+            };
 
-            return response()->stream(function () use ($publicUrl) {
-                $content = file_get_contents($publicUrl);
-                echo $content;
-            }, 200, [
-                'Content-Type'        => 'image/png',
-                'Content-Disposition' => 'attachment; filename="Creamo_' . $orderId . '.png"',
+            $filename = "Creamo_{$orderId}.{$extension}";
+
+            return response($content, 200, [
+                'Content-Type'        => $mimeType ?: 'image/png',
+                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+                'Content-Length'      => strlen($content),
             ]);
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['error' => 'Gagal mendownload: ' . $e->getMessage()]);

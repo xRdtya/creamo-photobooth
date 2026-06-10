@@ -22,7 +22,7 @@
 
             <div class="w-full max-w-70 mb-3">
                 <a href="{{ route('photo.download', $orderId) }}" 
-                   class="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl shadow-md transition duration-200 text-base md:text-lg">
+                   class="flex items-center justify-center gap-2 w-full bg-queaternary hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl shadow-md transition duration-200 text-base md:text-lg">
                     📥 Download Ke HP / Perangkat
                 </a>
             </div>
